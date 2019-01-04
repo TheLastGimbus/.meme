@@ -11,6 +11,9 @@ import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -55,7 +58,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         button_search.setOnClickListener {
-            Memebase().syncFoldersIndex(this, realm)
+            doAsync {
+                val paths = PainKiller().getAllFoldersWithImages(this@MainActivity)
+                    .map(File::getAbsolutePath)
+
+                uiThread {
+                    Memebase().syncFoldersIndex(realm, paths)
+                }
+            }
         }
 
     }

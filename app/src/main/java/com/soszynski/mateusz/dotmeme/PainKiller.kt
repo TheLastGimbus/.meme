@@ -10,6 +10,7 @@ import android.provider.MediaStore
 import android.support.v4.content.ContextCompat
 import android.util.Log
 import java.io.File
+import java.io.FileFilter
 
 /*
  * This is class where I put all the annoying, boilerplate things.
@@ -20,10 +21,10 @@ class PainKiller {
     val TAG = "PAINKILLER"
 
     // Requires READ_EXTERNAL_STORAGE permission.
-    fun getAllFoldersWithImages(context: Context): List<File> {
+    fun getAllFoldersWithImages(ctx: Context): List<File> {
         val dirs =
-            searchForPhotoDirs(context, Environment.getExternalStorageDirectory()) +
-                    searchForPhotoDirs(context, File("/storage"))
+            searchForPhotoDirs(ctx, Environment.getExternalStorageDirectory()) +
+                    searchForPhotoDirs(ctx, File("/storage"))
         var prettyDirs = ""
         for (dir in dirs) {
             prettyDirs += dir.absolutePath + "\n"
@@ -33,7 +34,24 @@ class PainKiller {
         return dirs.toList()
     }
 
-    private fun searchForPhotoDirs(context: Context, path: File): List<File> {
+    fun getAllImagesInFolder(folder: File): List<File> {
+        if (!folder.isDirectory) {
+            return emptyList()
+        }
+
+        val filesList = mutableListOf<File>()
+
+        val children = folder.listFiles(FileFilter { it.isFile })
+        for (child in children) {
+            if (child.isFile && isFileImage(child)) {
+                filesList.add(child)
+            }
+        }
+
+        return filesList
+    }
+
+    private fun searchForPhotoDirs(ctx: Context, path: File): List<File> {
         val dirs = mutableListOf<File>()
 
         val childrenPaths = path.listFiles()
@@ -46,7 +64,7 @@ class PainKiller {
                 continue
             }
             if (file.isDirectory) {
-                dirs.addAll(searchForPhotoDirs(context, file)) // recursion
+                dirs.addAll(searchForPhotoDirs(ctx, file)) // recursion
             } else if (file.isFile && isFileImage(file)) {
                 dirs.add(path)
                 break
