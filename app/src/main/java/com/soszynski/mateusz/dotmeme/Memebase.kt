@@ -5,7 +5,7 @@ import io.realm.Realm
 import java.io.File
 
 /*
- * Almost all things related to database of memes. *
+ * Almost all things related to database of memes.
  *
  * Do I need to say that almost all of this requires READ_EXTERNAL_MEMORY permission?
  */
@@ -49,19 +49,31 @@ class Memebase {
             val result =
                 realm.where(MemeFolder::class.java)
                     .not().`in`("folderPath", devicePaths.toTypedArray()).findAll()
-            Log.i(TAG, "Deleting folders from database, because they were not found on device: \n$result")
-            result.deleteAllFromRealm()
+            if (result.count() > 0) {
+                Log.i(TAG, "Deleting folders from database, because they were not found on device: \n$result")
+                result.deleteAllFromRealm()
+            }
         }
     }
 
-    // This takes a while, so run it async.
+    // This only updates index in database. Does't actually scan any image.
     fun syncFolder(realm: Realm, folder: MemeFolder) {
         deleteNotExistingMemesFromFolder(realm, folder)
-        scanAndAddNewMemesInFolder(realm, folder)
+        addNewMemesToFolder(realm, folder)
     }
 
-    private fun scanAndAddNewMemesInFolder(realm: Realm, folder: MemeFolder) {
-        // TODO: function working without stoping thread, but with callback when meme was added
+    private fun addNewMemesToFolder(realm: Realm, folder: MemeFolder) {
+        val images = PainKiller().getAllImagesInFolder(File(folder.folderPath))
+        realm.executeTransaction {
+            for (image in images) {
+                // If Meme with certain path doesn't exist yet
+                if (folder.memes.where().equalTo("filePath", image.absolutePath).findAll().count() == 0) {
+                    val meme = Meme()
+                    meme.filePath = image.absolutePath
+                    folder.memes.add(meme)
+                }
+            }
+        }
     }
 
     private fun deleteNotExistingMemesFromFolder(realm: Realm, folder: MemeFolder) {
@@ -76,8 +88,10 @@ class Memebase {
                 folder.memes.where()
                     .not().`in`("filePath", imagesList)
                     .findAll()
-            Log.i(TAG, "Deleting memes from database, because they were not found on device: \n$result")
-            result.deleteAllFromRealm()
+            if (result.count() > 0) {
+                Log.i(TAG, "Deleting memes from database, because they were not found on device: \n$result")
+                result.deleteAllFromRealm()
+            }
         }
     }
 

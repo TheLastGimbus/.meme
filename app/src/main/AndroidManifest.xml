@@ -10,8 +10,8 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:largeHeap="true"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
@@ -28,6 +28,9 @@
         </activity>
         <activity android:name=".SettingsActivity" />
 
+        <service
+            android:name=".MemeManagerIntentService"
+            android:exported="false"></service>
     </application>
 
 </manifest>
