@@ -3,7 +3,6 @@ package com.soszynski.mateusz.dotmeme
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import io.realm.Realm
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -39,12 +38,10 @@ class MemeManagerIntentService : IntentService("MemeManagerIntentService") {
 
             uiThread {
                 Memebase().syncFoldersIndex(realm, paths)
-                Log.i(TAG, "Begining syncing folders")
                 val memeFolders = realm.where(MemeFolder::class.java).findAll()
                 for (folder in memeFolders) {
                     Memebase().syncFolder(realm, folder)
                 }
-                Log.i(TAG, "End syncing")
             }
         }
     }

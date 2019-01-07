@@ -24,7 +24,7 @@ open class MemeFolder : RealmObject() {
     @Required
     var folderPath: String = ""
 
-    var isScanable: Boolean = false
+    var isScannable: Boolean = false
     var sdCard: Boolean = false
     var memes: RealmList<Meme> = RealmList()
 }

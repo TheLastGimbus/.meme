@@ -28,10 +28,10 @@ class FoldersSettingsFragment : Fragment() {
         text.setTextColor(ContextCompat.getColor(context!!, R.color.fontDefault))
 
         val sw = Switch(context)
-        sw.isChecked = folder.isScanable
+        sw.isChecked = folder.isScannable
         sw.setOnCheckedChangeListener { _, isChecked ->
             realm.executeTransaction { realm ->
-                folder.isScanable = isChecked
+                folder.isScannable = isChecked
             }
         }
 

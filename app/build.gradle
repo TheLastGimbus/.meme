@@ -48,7 +48,10 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:16.0.6'
     implementation 'com.google.firebase:firebase-ml-vision:18.0.2'
 
+    // This is like... the best fucking thing that could happen to Kotlin/Android.
+    // I don't know how did I leave without this.
     implementation 'org.jetbrains.anko:anko-common:0.9'
+
     implementation 'com.ablanco.imageprovider:imageprovider:0.1.0' // only temporary
 }
 

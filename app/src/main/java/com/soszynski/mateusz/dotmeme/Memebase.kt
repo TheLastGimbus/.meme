@@ -1,6 +1,9 @@
 package com.soszynski.mateusz.dotmeme
 
+import android.graphics.BitmapFactory
 import android.util.Log
+import com.google.firebase.ml.vision.FirebaseVision
+import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import io.realm.Realm
 import java.io.File
 
@@ -57,12 +60,15 @@ class Memebase {
     }
 
     // This only updates index in database. Does't actually scan any image.
-    fun syncFolder(realm: Realm, folder: MemeFolder) {
+    // Returns new memes that were added.
+    fun syncFolder(realm: Realm, folder: MemeFolder): List<Meme> {
         deleteNotExistingMemesFromFolder(realm, folder)
-        addNewMemesToFolder(realm, folder)
+        return addNewMemesToFolder(realm, folder)
     }
 
-    private fun addNewMemesToFolder(realm: Realm, folder: MemeFolder) {
+    private fun addNewMemesToFolder(realm: Realm, folder: MemeFolder): List<Meme> {
+        val newMemes = mutableListOf<Meme>()
+
         val images = PainKiller().getAllImagesInFolder(File(folder.folderPath))
         realm.executeTransaction {
             for (image in images) {
@@ -71,9 +77,12 @@ class Memebase {
                     val meme = Meme()
                     meme.filePath = image.absolutePath
                     folder.memes.add(meme)
+                    newMemes.add(meme)
                 }
             }
         }
+
+        return newMemes
     }
 
     private fun deleteNotExistingMemesFromFolder(realm: Realm, folder: MemeFolder) {
@@ -92,6 +101,45 @@ class Memebase {
                 Log.i(TAG, "Deleting memes from database, because they were not found on device: \n$result")
                 result.deleteAllFromRealm()
             }
+        }
+    }
+
+    fun scanFolder(
+        realm: Realm,
+        folder: MemeFolder,
+        progress: (all: Int, scanned: Int) -> Unit,
+        finished: () -> Unit
+    ) {
+        // very important to do it all the time if user deletes images while scanning
+        syncFolder(realm, folder)
+
+        val notScannedMemes = folder.memes.where()
+            .equalTo("isScanned", false).findAll()
+        if (notScannedMemes.count() > 0) {
+            val meme = notScannedMemes.first()!!
+            val bitmap = BitmapFactory.decodeFile(meme.filePath)
+            val fireImage = FirebaseVisionImage.fromBitmap(bitmap)
+            val ocr = FirebaseVision.getInstance().onDeviceTextRecognizer
+            ocr.processImage(fireImage)
+                .addOnSuccessListener { fireText ->
+                    realm.executeTransaction {
+                        meme.rawText = fireText.text
+                        meme.isScanned = true
+                    }
+                }
+                .addOnFailureListener { e ->
+                    e.printStackTrace()
+                }
+                .continueWith {
+                    val all = folder.memes.count()
+                    val scanned = folder.memes.where().equalTo("isScanned", true).findAll().count()
+                    progress(all, scanned)
+
+                    // This is theoretically recursion, but actually no code is left in stack
+                    scanFolder(realm, folder, progress, finished)
+                }
+        } else {
+            finished()
         }
     }
 
