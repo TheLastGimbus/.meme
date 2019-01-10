@@ -4,8 +4,12 @@ import android.graphics.BitmapFactory
 import android.util.Log
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
+import io.realm.Case
 import io.realm.Realm
+import io.realm.RealmObject
+import io.realm.RealmResults
 import java.io.File
+
 
 /*
  * Almost all things related to database of memes.
@@ -62,7 +66,7 @@ class Memebase {
     // This only updates index in database. Does't actually scan any image.
     // Returns new memes that were added.
     fun syncFolder(realm: Realm, folder: MemeFolder): List<Meme> {
-        deleteNotExistingMemesFromFolder(realm, folder)
+        deleteNotExistingMemesFromFolder(realm, folder) // TODO: Test why this shit is taking so long
         return addNewMemesToFolder(realm, folder)
     }
 
@@ -98,7 +102,6 @@ class Memebase {
                     .not().`in`("filePath", imagesList)
                     .findAll()
             if (result.count() > 0) {
-                Log.i(TAG, "Deleting memes from database, because they were not found on device: \n$result")
                 result.deleteAllFromRealm()
             }
         }
@@ -111,7 +114,9 @@ class Memebase {
         finished: () -> Unit
     ) {
         // very important to do it all the time if user deletes images while scanning
+        Log.i(TAG, "Syncing folder")
         syncFolder(realm, folder)
+        Log.i(TAG, "Syncing end")
 
         val notScannedMemes = folder.memes.where()
             .equalTo("isScanned", false).findAll()
@@ -141,6 +146,31 @@ class Memebase {
         } else {
             finished()
         }
+    }
+
+
+    // Yeah, copied from internet.
+    // TODO: Make better, more flexible search
+    fun <T : RealmObject> search(
+        realm: Realm,
+        modelClass: Class<T>,
+        query: String,
+        fieldName: String,
+        partialSearch: Boolean = false // don't know what it is. Copied from internet :)
+    ): RealmResults<T> {
+        var realmResults = realm.where(modelClass).findAll()
+        if (query.isEmpty()) {
+            return realmResults
+        }
+        val keywords = query.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        for (keyword in keywords) {
+            val spacedKeyword = " $keyword"
+            realmResults = realmResults.where()
+                .beginsWith(fieldName, keyword, Case.INSENSITIVE)
+                .or()
+                .contains(fieldName, spacedKeyword, Case.INSENSITIVE).findAll()
+        }
+        return realmResults
     }
 
 }

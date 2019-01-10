@@ -52,6 +52,9 @@ dependencies {
     // I don't know how did I leave without this.
     implementation 'org.jetbrains.anko:anko-common:0.9'
 
+    implementation 'com.github.bumptech.glide:glide:4.8.0'
+    kapt 'com.github.bumptech.glide:compiler:4.8.0'
+
     implementation 'com.ablanco.imageprovider:imageprovider:0.1.0' // only temporary
 }
 

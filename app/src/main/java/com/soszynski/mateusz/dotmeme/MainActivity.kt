@@ -55,6 +55,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         button_search.setOnClickListener {
+            startActivity(Intent(this, SearchActivity::class.java))
+        }
+
+        button_sync.setOnClickListener {
             MemeManagerIntentService.startActionSyncAll(this)
         }
 

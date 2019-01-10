@@ -3,6 +3,7 @@ package com.soszynski.mateusz.dotmeme
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import io.realm.Realm
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -41,6 +42,16 @@ class MemeManagerIntentService : IntentService("MemeManagerIntentService") {
                 val memeFolders = realm.where(MemeFolder::class.java).findAll()
                 for (folder in memeFolders) {
                     Memebase().syncFolder(realm, folder)
+                    val folderName = File(folder.folderPath).name
+                    if (folder.isScannable) {
+                        Memebase().scanFolder(realm, folder,
+                            { max, progress ->
+                                Log.i(TAG, "Scanning in $folderName, max: $max, progress: $progress")
+                            },
+                            {
+                                Log.i(TAG, "Finished scanning in $folderName")
+                            })
+                    }
                 }
             }
         }

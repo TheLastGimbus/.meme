@@ -31,7 +31,9 @@
 
         <service
             android:name=".MemeManagerIntentService"
-            android:exported="false"></service>
+            android:exported="false" />
+
+        <activity android:name=".SearchActivity"></activity>
     </application>
 
 </manifest>
