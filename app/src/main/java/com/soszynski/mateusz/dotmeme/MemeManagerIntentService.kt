@@ -5,9 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import io.realm.Realm
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
-import java.io.File
+import org.jetbrains.anko.runOnUiThread
 
 private const val ACTION_SYNC_ALL = "com.soszynski.mateusz.dotmeme.action.SYNC_ALL"
 
@@ -33,26 +31,9 @@ class MemeManagerIntentService : IntentService("MemeManagerIntentService") {
     }
 
     private fun handleActionSyncAll() {
-        doAsync {
-            val paths = PainKiller().getAllFoldersWithImages(this@MemeManagerIntentService)
-                .map(File::getAbsolutePath)
-
-            uiThread {
-                Memebase().syncFoldersIndex(realm, paths)
-                val memeFolders = realm.where(MemeFolder::class.java).findAll()
-                for (folder in memeFolders) {
-                    Memebase().syncFolder(realm, folder)
-                    val folderName = File(folder.folderPath).name
-                    if (folder.isScannable) {
-                        Memebase().scanFolder(realm, folder,
-                            { max, progress ->
-                                Log.i(TAG, "Scanning in $folderName, max: $max, progress: $progress")
-                            },
-                            {
-                                Log.i(TAG, "Finished scanning in $folderName")
-                            })
-                    }
-                }
+        runOnUiThread {
+            Memebase().syncAllFolders(realm, this) {
+                Log.i(TAG, "Global sync finished!")
             }
         }
     }

@@ -10,7 +10,6 @@ import android.provider.MediaStore
 import android.support.v4.content.ContextCompat
 import android.util.Log
 import java.io.File
-import java.io.FileFilter
 
 /*
  * This is class where I put all the annoying, boilerplate things.
@@ -39,16 +38,9 @@ class PainKiller {
             return emptyList()
         }
 
-        val filesList = mutableListOf<File>()
-
-        val children = folder.listFiles(FileFilter { it.isFile })
-        for (child in children) {
-            if (child.isFile && isFileImage(child)) {
-                filesList.add(child)
-            }
-        }
-
-        return filesList
+        return folder.listFiles { file ->
+            return@listFiles (file.isFile && isFileImage(file))
+        }.toList()
     }
 
     private fun searchForPhotoDirs(ctx: Context, path: File): List<File> {
