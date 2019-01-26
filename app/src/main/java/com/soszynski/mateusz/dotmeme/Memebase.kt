@@ -7,9 +7,7 @@ import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import io.realm.Case
 import io.realm.Realm
-import io.realm.RealmObject
 import io.realm.RealmResults
-import io.realm.internal.OsResults
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.io.File
@@ -45,7 +43,7 @@ class Memebase {
         realm.executeTransactionAsync { realm ->
             for (path in devicePaths) {
                 val count = realm.where(MemeFolder::class.java)
-                    .equalTo("folderPath", path).findAll()
+                    .equalTo(MemeFolder.FOLDER_PATH, path).findAll()
                     .count()
 
                 if (count == 0) {
@@ -65,7 +63,7 @@ class Memebase {
         realm.executeTransaction { realm ->
             val result =
                 realm.where(MemeFolder::class.java)
-                    .not().`in`("folderPath", devicePaths.toTypedArray()).findAll()
+                    .not().`in`(MemeFolder.FOLDER_PATH, devicePaths.toTypedArray()).findAll()
             if (result.count() > 0) {
                 Log.i(TAG, "Deleting folders from database, because they were not found on device: \n$result")
                 result.deleteAllFromRealm()
@@ -113,11 +111,11 @@ class Memebase {
 
                 // Yeah, kinda boilerplate, but whatever...
                 val folder = realm.where(MemeFolder::class.java)
-                    .equalTo("folderPath", folderPath).findFirst()!!
+                    .equalTo(MemeFolder.FOLDER_PATH, folderPath).findFirst()!!
 
                 for (image in filesList) {
                     // If Meme with certain path doesn't exist yet
-                    if (folder.memes.where().equalTo("filePath", image.absolutePath).findAll().count() == 0) {
+                    if (folder.memes.where().equalTo(Meme.FILE_PATH, image.absolutePath).findAll().count() == 0) {
                         val meme = Meme()
                         meme.filePath = image.absolutePath
                         folder.memes.add(meme)
@@ -150,11 +148,11 @@ class Memebase {
             { realm ->
                 // Yeah, kinda boilerplate, but whatever...
                 val folder = realm.where(MemeFolder::class.java)
-                    .equalTo("folderPath", folderPath).findFirst()!!
+                    .equalTo(MemeFolder.FOLDER_PATH, folderPath).findFirst()!!
 
                 val result =
                     folder.memes.where()
-                        .not().`in`("filePath", filesList.map(File::getAbsolutePath).toTypedArray())
+                        .not().`in`(Meme.FILE_PATH, filesList.map(File::getAbsolutePath).toTypedArray())
                         .findAll()
                 result.deleteAllFromRealm()
             },
@@ -179,7 +177,7 @@ class Memebase {
             uiThread {
                 syncFoldersIndex(realm, foldersList)
                 val foldersToSync = realm.where(MemeFolder::class.java)
-                    .equalTo("isScannable", true).findAll()
+                    .equalTo(MemeFolder.IS_SCANNABLE, true).findAll()
                 syncAllFoldersRecursive(realm, foldersToSync) {
                     isSyncing = false
                     finished()
@@ -215,7 +213,7 @@ class Memebase {
         isScanning = true
         // TODO: Make scanning safe by syncing folder before scanning
         val notScannedMemes = folder.memes.where()
-            .equalTo("isScanned", false).findAll()
+            .equalTo(Meme.IS_SCANNED, false).findAll()
         if (notScannedMemes.count() > 0) {
             val meme = notScannedMemes.first()!!
             val bitmap = BitmapFactory.decodeFile(meme.filePath)
@@ -233,7 +231,7 @@ class Memebase {
                 }
                 .continueWith {
                     val all = folder.memes.count()
-                    val scanned = folder.memes.where().equalTo("isScanned", true).findAll().count()
+                    val scanned = folder.memes.where().equalTo(Meme.IS_SCANNED, true).findAll().count()
                     progress(all, scanned)
 
                     // This is theoretically recursion, but actually no code is left in stack
@@ -260,7 +258,10 @@ class Memebase {
                 for (keyword in keywords) {
                     memeList.addAll(
                         folder.memes.where()
-                            .contains("rawText", keyword, Case.INSENSITIVE)
+                            .contains(
+                                Meme.RAW_TEXT
+                                , keyword, Case.INSENSITIVE
+                            )
                             .findAll()
                     )
                 }

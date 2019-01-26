@@ -17,6 +17,14 @@ open class Meme : RealmObject() {
     // This isn't any official version.
     // If OCR gets better, we will +1 this and re-scan all older ones.
     var ocrVersion = 1
+
+    companion object {
+        val FILE_PATH = "filePath"
+        val RAW_TEXT = "rawText"
+        val LABELS = "labels"
+        val IS_SCANNED = "isScanned"
+        val OCR_VERSION = "ocrVersion"
+    }
 }
 
 open class MemeFolder : RealmObject() {
@@ -27,4 +35,11 @@ open class MemeFolder : RealmObject() {
     var isScannable: Boolean = false
     var sdCard: Boolean = false
     var memes: RealmList<Meme> = RealmList()
+
+    companion object {
+        val FOLDER_PATH = "folderPath"
+        val IS_SCANNABLE = "isScannable"
+        val SD_CARD = "sdCard"
+        val MEMES = "memes"
+    }
 }
