@@ -25,6 +25,8 @@ class MainActivity : AppCompatActivity() {
 
         realm = Realm.getDefaultInstance()
 
+        Notifications().createChannels(this)
+
         permission()
 
         button_scan.setOnClickListener {

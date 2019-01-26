@@ -41,5 +41,10 @@ open class MemeFolder : RealmObject() {
         val IS_SCANNABLE = "isScannable"
         val SD_CARD = "sdCard"
         val MEMES = "memes"
+
+
+        fun isFolderFullyScanned(folder: MemeFolder): Boolean {
+            return folder.memes.where().equalTo(Meme.IS_SCANNED, false).count().toInt() == 0
+        }
     }
 }
