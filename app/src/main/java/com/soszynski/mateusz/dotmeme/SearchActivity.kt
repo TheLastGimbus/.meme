@@ -10,10 +10,12 @@ import kotlinx.android.synthetic.main.activity_search.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.io.ByteArrayOutputStream
+import java.util.concurrent.Future
 
 
 class SearchActivity : AppCompatActivity() {
     lateinit var realm: Realm
+    private var renderImagesTask: Future<Unit>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,11 +29,14 @@ class SearchActivity : AppCompatActivity() {
                 linearLayout_results.removeAllViews()
 
                 val finalList = Memebase()
-                    .search(realm, Meme::class.java, s.toString(), "rawText")
+                    .search(realm, s.toString())
                     .map(Meme::filePath)
 
-                doAsync {
+                renderImagesTask = doAsync {
                     for (meme in finalList) {
+                        if(renderImagesTask != null && renderImagesTask!!.isCancelled){
+                            break
+                        }
                         val image = ImageView(this@SearchActivity)
                         val bitmap = BitmapFactory.decodeFile(meme)
                         val stream = ByteArrayOutputStream()
@@ -48,6 +53,11 @@ class SearchActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        renderImagesTask?.cancel(true)
     }
 
     companion object {

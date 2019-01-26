@@ -9,6 +9,7 @@ import io.realm.Case
 import io.realm.Realm
 import io.realm.RealmObject
 import io.realm.RealmResults
+import io.realm.internal.OsResults
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.io.File
@@ -27,6 +28,9 @@ class Memebase {
     companion object {
         val TAG = "Memebase class"
     }
+
+    var isSyncing = false
+    var isScanning = false
 
     // Returns new found folders
     private fun syncFoldersIndex(realm: Realm, paths: List<String>): List<MemeFolder> {
@@ -168,6 +172,7 @@ class Memebase {
 
     // You should call this only after syncing folders index
     fun syncAllFolders(realm: Realm, ctx: Context, finished: () -> Unit) {
+        isSyncing = true
         doAsync {
             val foldersList = PainKiller().getAllFoldersWithImages(ctx)
                 .map(File::getAbsolutePath)
@@ -176,6 +181,7 @@ class Memebase {
                 val foldersToSync = realm.where(MemeFolder::class.java)
                     .equalTo("isScannable", true).findAll()
                 syncAllFoldersRecursive(realm, foldersToSync) {
+                    isSyncing = false
                     finished()
                 }
             }
@@ -206,6 +212,7 @@ class Memebase {
         progress: (all: Int, scanned: Int) -> Unit,
         finished: () -> Unit
     ) {
+        isScanning = true
         // TODO: Make scanning safe by syncing folder before scanning
         val notScannedMemes = folder.memes.where()
             .equalTo("isScanned", false).findAll()
@@ -233,34 +240,33 @@ class Memebase {
                     scanFolder(realm, folder, progress, finished)
                 }
         } else {
+            isScanning = false
             finished()
         }
 
     }
 
-
-    // Yeah, copied from internet.
     // TODO: Make better, more flexible search
-    fun <T : RealmObject> search(
+    fun search(
         realm: Realm,
-        modelClass: Class<T>,
         query: String,
-        fieldName: String,
-        partialSearch: Boolean = false // don't know what it is. Copied from internet :)
-    ): RealmResults<T> {
-        var realmResults = realm.where(modelClass).findAll()
-        if (query.isEmpty()) {
-            return realmResults
-        }
+        folders: RealmResults<MemeFolder>? = realm.where(MemeFolder::class.java).findAll()
+    ): List<Meme> {
+        val memeList = mutableListOf<Meme>()
+
         val keywords = query.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        for (keyword in keywords) {
-            val spacedKeyword = " $keyword"
-            realmResults = realmResults.where()
-                .beginsWith(fieldName, keyword, Case.INSENSITIVE)
-                .or()
-                .contains(fieldName, spacedKeyword, Case.INSENSITIVE).findAll()
+        if (folders != null) {
+            for(folder in folders) {
+                for (keyword in keywords) {
+                    memeList.addAll(
+                        folder.memes.where()
+                            .contains("rawText", keyword, Case.INSENSITIVE)
+                            .findAll()
+                    )
+                }
+            }
         }
-        return realmResults
+        return memeList
     }
 
 }
