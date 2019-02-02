@@ -38,7 +38,7 @@ class Notifications {
         val builder = NotificationCompat.Builder(ctx)
             .setChannelId(CHANNEL_ID_SYNCING)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .setContentTitle("Scanning memes...")
             .setContentIntent(pi)
 
@@ -56,16 +56,26 @@ class Notifications {
 
     fun createChannels(ctx: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createChannel(ctx, CHANNEL_ID_SYNCING, "Meme sync", null)
+            createChannel(
+                ctx,
+                CHANNEL_ID_SYNCING,
+                "Meme sync",
+                null,
+                NotificationManager.IMPORTANCE_LOW
+            )
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun createChannel(ctx: Context, id: String, name: String, description: String?) {
+    private fun createChannel(
+        ctx: Context,
+        id: String,
+        name: String,
+        description: String?,
+        importance: Int = NotificationManager.IMPORTANCE_DEFAULT
+    ) {
         val notificationManager =
             ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        val importance = NotificationManager.IMPORTANCE_DEFAULT
 
         val mChannel = NotificationChannel(id, name, importance)
         if (description.isNullOrEmpty() == false) {

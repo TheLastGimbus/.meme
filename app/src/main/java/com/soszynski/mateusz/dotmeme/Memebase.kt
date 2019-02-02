@@ -2,6 +2,7 @@ package com.soszynski.mateusz.dotmeme
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.os.FileObserver
 import android.util.Log
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
@@ -130,7 +131,7 @@ class Memebase {
             { e: Throwable ->
                 // error
                 e.printStackTrace()
-                finished(newMemes)
+                finished(newMemes) // but we still need to make callback
             }
         )
     }
@@ -211,7 +212,34 @@ class Memebase {
         finished: () -> Unit
     ) {
         isScanning = true
-        // TODO: Make scanning safe by syncing folder before scanning
+
+        val folderPath = folder.folderPath
+
+        var changeInFolder = false
+        val observer = object : FileObserver(folderPath) {
+            // keep in mind that this is different thread, we can't access realms there
+            override fun onEvent(event: Int, file: String?) {
+                val wantedEvents = intArrayOf(
+                    FileObserver.CREATE,
+                    FileObserver.CLOSE_WRITE,
+                    FileObserver.CREATE,
+                    FileObserver.DELETE,
+                    FileObserver.DELETE_SELF,
+                    FileObserver.MODIFY,
+                    FileObserver.MOVED_FROM,
+                    FileObserver.MOVED_TO,
+                    FileObserver.MOVE_SELF,
+                    FileObserver.ATTRIB
+                )
+                if (wantedEvents.contains(event)) {
+                    Log.d(TAG, "File observer, change in $folderPath/$file")
+                    changeInFolder = true
+                }
+            }
+        }
+        observer.startWatching()
+
+
         val notScannedMemes = folder.memes.where()
             .equalTo(Meme.IS_SCANNED, false).findAll()
         if (notScannedMemes.count() > 0) {
@@ -234,7 +262,12 @@ class Memebase {
                     val scanned = folder.memes.where().equalTo(Meme.IS_SCANNED, true).findAll().count()
                     progress(all, scanned)
 
-                    // This is theoretically recursion, but actually no code is left in stack
+                    if (changeInFolder) {
+                        syncFolder(realm, folder) {}
+                    }
+                    observer.stopWatching()
+
+                    // This is theoretically recursion, but there is nothing big to be left in stack
                     scanFolder(realm, folder, progress, finished)
                 }
         } else {
@@ -254,7 +287,7 @@ class Memebase {
 
         val keywords = query.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         if (folders != null) {
-            for(folder in folders) {
+            for (folder in folders) {
                 for (keyword in keywords) {
                     memeList.addAll(
                         folder.memes.where()
