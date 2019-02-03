@@ -32,15 +32,23 @@ class Notifications {
         progress: Int?,
         max: Int?
     ): Notification {
-        val pi = PendingIntent
+        val piMain = PendingIntent
             .getActivity(ctx, 0, Intent(ctx, MainActivity::class.java), 0)
+        val piPause = PendingIntent.getService(
+            ctx,
+            0,
+            Intent(ctx, MemeManagerIntentService::class.java).apply {
+                action = MemeManagerIntentService.ACTION_PAUSE
+            },
+            0
+        )
 
-        val builder = NotificationCompat.Builder(ctx)
+        val builder = NotificationCompat.Builder(ctx, CHANNEL_ID_SYNCING)
             .setChannelId(CHANNEL_ID_SYNCING)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setContentTitle("Scanning memes...")
-            .setContentIntent(pi)
+            .setContentIntent(piMain)
 
         if (!folderName.isNullOrEmpty() && max != null && progress != null) {
             builder
@@ -49,6 +57,7 @@ class Notifications {
                         .bigText("Folder: $folderName \nScanned: $progress, all: $max")
                 )
                 .setProgress(max, progress, false)
+                .addAction(0, "Pause", piPause)
         }
 
         return builder.build()

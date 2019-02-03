@@ -28,8 +28,11 @@ class Memebase {
         val TAG = "Memebase class"
     }
 
+    lateinit var scanningFileObserver: FileObserver
+
     var isSyncing = false
     var isScanning = false
+    var scanningCanceled = false
 
     // Returns new found folders
     private fun syncFoldersIndex(realm: Realm, paths: List<String>): List<MemeFolder> {
@@ -216,7 +219,7 @@ class Memebase {
         val folderPath = folder.folderPath
 
         var changeInFolder = false
-        val observer = object : FileObserver(folderPath) {
+        scanningFileObserver = object : FileObserver(folderPath) {
             // keep in mind that this is different thread, we can't access realms there
             override fun onEvent(event: Int, file: String?) {
                 val wantedEvents = intArrayOf(
@@ -237,7 +240,7 @@ class Memebase {
                 }
             }
         }
-        observer.startWatching()
+        scanningFileObserver.startWatching()
 
 
         val notScannedMemes = folder.memes.where()
@@ -249,15 +252,30 @@ class Memebase {
             val ocr = FirebaseVision.getInstance().onDeviceTextRecognizer
             ocr.processImage(fireImage)
                 .addOnSuccessListener { fireText ->
-                    realm.executeTransaction {
-                        meme.rawText = fireText.text
-                        meme.isScanned = true
+                    if (scanningCanceled) {
+                        isScanning = false
+                        return@addOnSuccessListener
+                    }
+                    try {
+                        realm.executeTransaction {
+                            meme.rawText = fireText.text
+                            meme.isScanned = true
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
                 }
                 .addOnFailureListener { e ->
                     e.printStackTrace()
                 }
                 .continueWith {
+                    if (scanningCanceled) {
+                        scanningFileObserver.stopWatching()
+                        isScanning = false
+                        finished()
+                        return@continueWith
+                    }
+
                     val all = folder.memes.count()
                     val scanned = folder.memes.where().equalTo(Meme.IS_SCANNED, true).findAll().count()
                     progress(all, scanned)
@@ -265,7 +283,7 @@ class Memebase {
                     if (changeInFolder) {
                         syncFolder(realm, folder) {}
                     }
-                    observer.stopWatching()
+                    scanningFileObserver.stopWatching()
 
                     // This is theoretically recursion, but there is nothing big to be left in stack
                     scanFolder(realm, folder, progress, finished)
@@ -291,10 +309,7 @@ class Memebase {
                 for (keyword in keywords) {
                     memeList.addAll(
                         folder.memes.where()
-                            .contains(
-                                Meme.RAW_TEXT
-                                , keyword, Case.INSENSITIVE
-                            )
+                            .contains(Meme.RAW_TEXT, keyword, Case.INSENSITIVE)
                             .findAll()
                     )
                 }

@@ -53,11 +53,18 @@
                 android:text="Settings" />
         </LinearLayout>
 
+        <Switch
+            android:id="@+id/switch_scanning_paused"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="Scanning paused" />
+
         <TextView
             android:id="@+id/textView_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="4dp"
+            android:layout_margin="8dp"
             android:text="Text"
             android:textIsSelectable="true" />
 

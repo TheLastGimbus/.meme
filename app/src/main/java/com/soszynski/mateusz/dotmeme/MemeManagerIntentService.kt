@@ -4,20 +4,22 @@ import android.app.IntentService
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.util.Log
 import io.realm.Realm
-import org.jetbrains.anko.runOnUiThread
+import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
-
-private const val ACTION_SYNC_ALL = "com.soszynski.mateusz.dotmeme.action.SYNC_ALL"
 
 class MemeManagerIntentService : IntentService("MemeManagerIntentService") {
     lateinit var realm: Realm
-    var lastStartId: Int = 0
+    private val memebase = Memebase()
+    lateinit var prefs: SharedPreferences
+    var syncAllStartId: Int = 0
 
     override fun onCreate() {
         super.onCreate()
         realm = Realm.getDefaultInstance()
+        prefs = defaultSharedPreferences
     }
 
     override fun onDestroy() {
@@ -31,29 +33,41 @@ class MemeManagerIntentService : IntentService("MemeManagerIntentService") {
             ACTION_SYNC_ALL -> {
                 handleActionSyncAll()
             }
+            ACTION_PAUSE -> {
+                defaultSharedPreferences.edit()
+                    .putBoolean(Prefs.PREF_SCANNING_PAUSED, true)
+                    .apply()
+                memebase.scanningCanceled = true
+            }
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        lastStartId = startId
+        if (intent?.action == ACTION_SYNC_ALL) {
+            syncAllStartId = startId
+        }
         onHandleIntent(intent)
         return Service.START_REDELIVER_INTENT
     }
 
     private fun handleActionSyncAll() {
-        runOnUiThread {
-            Memebase().syncAllFolders(realm, this) {
-                Log.i(TAG, "Global sync finished!")
+        memebase.syncAllFolders(realm, this) {
+            Log.i(TAG, "Global sync finished!")
 
-                recursiveScanAllFolders {
-                    Log.i(TAG, "Scanning folders finished!")
-                    stopSelf(lastStartId)
-                }
+            recursiveScanAllFolders {
+                Log.i(TAG, "Scanning folders finished!")
+                stopSelf(syncAllStartId)
             }
         }
     }
 
     private fun recursiveScanAllFolders(finished: () -> Unit) {
+        if (prefs.getBoolean(Prefs.PREF_SCANNING_PAUSED, false)) {
+            stopForeground(true)
+            finished()
+            return
+        }
+
         var folderToScan: MemeFolder? = null
         for (folder in realm.where(MemeFolder::class.java).findAll()) {
             if (!MemeFolder.isFolderFullyScanned(folder)) {
@@ -69,7 +83,8 @@ class MemeManagerIntentService : IntentService("MemeManagerIntentService") {
 
         val folderName = File(folderToScan.folderPath).name
 
-        Memebase().scanFolder(realm, folderToScan,
+        memebase.scanFolder(
+            realm, folderToScan,
             { max, progress ->
                 // progress
                 val notification = Notifications().getScanningForegroundNotification(
@@ -89,8 +104,12 @@ class MemeManagerIntentService : IntentService("MemeManagerIntentService") {
     }
 
     companion object {
-        val TAG = "MemeManager"
-        val FOREGROUND_NOTIFICATION_ID = 15
+        const val TAG = "MemeManager"
+
+        const val ACTION_SYNC_ALL = "service.action.SYNC_ALL"
+        const val ACTION_PAUSE = "service.action.PAUSE"
+
+        const val FOREGROUND_NOTIFICATION_ID = 15
 
         @JvmStatic
         fun startActionSyncAll(context: Context) {
