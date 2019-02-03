@@ -17,7 +17,11 @@ import java.io.File
  */
 
 class PainKiller {
-    val TAG = "PAINKILLER"
+    companion object {
+        val TAG = "PAINKILLER"
+    }
+
+    val imageFileExtensions = listOf("jpg", "png", "jpeg", "raw", "bmp")
 
     // Requires READ_EXTERNAL_STORAGE permission.
     fun getAllFoldersWithImages(ctx: Context): List<File> {
@@ -67,14 +71,7 @@ class PainKiller {
     }
 
     private fun isFileImage(file: File): Boolean {
-        val okFileExtensions = arrayOf("jpg", "png", "jpeg", "raw", "bmp")
-
-        for (extension in okFileExtensions) {
-            if (file.name.toLowerCase().endsWith(extension)) {
-                return true
-            }
-        }
-        return false
+        return imageFileExtensions.contains(file.extension.toLowerCase())
     }
 
 
