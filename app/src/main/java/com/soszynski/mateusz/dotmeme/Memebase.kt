@@ -25,7 +25,7 @@ import java.io.File
 
 class Memebase {
     companion object {
-        val TAG = "Memebase class"
+        const val TAG = "Memebase class"
     }
 
     lateinit var scanningFileObserver: FileObserver

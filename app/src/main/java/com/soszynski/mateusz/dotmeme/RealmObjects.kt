@@ -19,11 +19,11 @@ open class Meme : RealmObject() {
     var ocrVersion = 1
 
     companion object {
-        val FILE_PATH = "filePath"
-        val RAW_TEXT = "rawText"
-        val LABELS = "labels"
-        val IS_SCANNED = "isScanned"
-        val OCR_VERSION = "ocrVersion"
+        const val FILE_PATH = "filePath"
+        const val RAW_TEXT = "rawText"
+        const val LABELS = "labels"
+        const val IS_SCANNED = "isScanned"
+        const val OCR_VERSION = "ocrVersion"
     }
 }
 

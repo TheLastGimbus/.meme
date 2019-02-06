@@ -13,8 +13,8 @@ import java.io.File
 class MemeManagerIntentService : IntentService("MemeManagerIntentService") {
     lateinit var realm: Realm
     private val memebase = Memebase()
-    lateinit var prefs: SharedPreferences
-    var syncAllStartId: Int = 0
+    private lateinit var prefs: SharedPreferences
+    private var syncAllStartId: Int = 0
 
     override fun onCreate() {
         super.onCreate()

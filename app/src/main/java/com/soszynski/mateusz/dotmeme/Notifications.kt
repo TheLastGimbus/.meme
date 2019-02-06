@@ -17,8 +17,8 @@ import androidx.annotation.RequiresApi
 
 class Notifications {
     companion object {
-        val CHANNEL_ID_SYNCING = "channel_id_syncing"
-        val NOTIFICATION_ID_SYNCING = 15
+        const val CHANNEL_ID_SYNCING = "channel_id_syncing"
+        const val NOTIFICATION_ID_SYNCING = 15
     }
 
     fun notifyNewFoldersFound(ctx: Context) {

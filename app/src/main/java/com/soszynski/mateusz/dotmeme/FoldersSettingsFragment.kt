@@ -16,7 +16,7 @@ import java.io.File
 
 class FoldersSettingsFragment : Fragment() {
     companion object {
-        val TAG = "FoldersSettingsFragment"
+        const val TAG = "FoldersSettingsFragment"
     }
 
     lateinit var realm: Realm

@@ -61,6 +61,6 @@ class SearchActivity : AppCompatActivity() {
     }
 
     companion object {
-        val TAG = "SearchActivity"
+        const val TAG = "SearchActivity"
     }
 }
