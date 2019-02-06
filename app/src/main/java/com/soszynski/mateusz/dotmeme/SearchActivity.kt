@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.view.WindowManager
 import android.widget.ImageView
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_search.*
@@ -20,6 +21,11 @@ class SearchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
+        setSupportActionBar(activity_search_toolbar)
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+        activity_search_toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
 
         realm = Realm.getDefaultInstance()
 
