@@ -19,7 +19,7 @@ import java.io.File
 class PainKiller {
     companion object {
         const val TAG = "PAINKILLER"
-        val imageFileExtensions = listOf("jpg", "png", "jpeg", "raw", "bmp")
+        val imageFileExtensions = listOf("jpg", "png", "jpeg", "jpe", "bmp")
     }
 
     // Requires READ_EXTERNAL_STORAGE permission.
