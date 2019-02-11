@@ -46,17 +46,19 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
-    implementation 'com.google.firebase:firebase-core:16.0.6'
-    implementation 'com.google.firebase:firebase-ml-vision:18.0.2'
+    implementation 'com.google.firebase:firebase-core:16.0.7'
+    implementation 'com.google.firebase:firebase-ml-vision:19.0.2'
 
     // This is like... the best fucking thing that could happen to Kotlin/Android.
     // I don't know how did I leave without this.
     implementation 'org.jetbrains.anko:anko-common:0.9'
 
-    implementation 'com.github.bumptech.glide:glide:4.8.0'
-    kapt 'com.github.bumptech.glide:compiler:4.8.0'
+    implementation 'io.doorbell:android-sdk:0.3.0@aar'
+
+    implementation 'com.squareup.picasso:picasso:2.71828'
 
     implementation 'com.ablanco.imageprovider:imageprovider:0.1.0' // only temporary
+    implementation 'android.arch.navigation:navigation-fragment:1.0.0-beta01'
 }
 
 apply plugin: 'com.google.gms.google-services'

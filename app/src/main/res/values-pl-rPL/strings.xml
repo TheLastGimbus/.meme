@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">.meme</string>
+    <string name="navigation_drawer_open">Otwórz boczne menu</string>
+    <string name="navigation_drawer_close">Zamknij boczne menu</string>
+    <string name="navigation_drawer_item_send_feedback">Przekaż opinie</string>
+    <string name="settings">Ustawienia</string>
+</resources>
