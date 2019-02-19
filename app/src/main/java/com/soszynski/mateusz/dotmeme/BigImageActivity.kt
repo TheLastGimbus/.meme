@@ -1,5 +1,7 @@
 package com.soszynski.mateusz.dotmeme
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.squareup.picasso.Picasso
@@ -19,13 +21,22 @@ class BigImageActivity : AppCompatActivity() {
             onBackPressed()
         }
 
+
         val srcStr = intent.getStringExtra(IMAGE_SRC_PATH)
-        if (srcStr.isNullOrEmpty() == false) {
+        if (!srcStr.isNullOrEmpty()) {
             val file = File(srcStr)
             Picasso.get()
                 .load(file)
                 .error(R.drawable.ic_error_outline_gray_24dp)
                 .into(imageView_big_meme)
+
+
+            button_share.setOnClickListener {
+                val intent = Intent(Intent.ACTION_SEND)
+                intent.type = "image/${file.extension}"
+                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file))
+                startActivity(Intent.createChooser(intent, "Share meme"))
+            }
         }
     }
 
