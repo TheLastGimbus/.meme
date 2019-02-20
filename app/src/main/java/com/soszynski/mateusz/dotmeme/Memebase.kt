@@ -34,6 +34,8 @@ class Memebase {
     var isScanning = false
     var scanningCanceled = false
 
+    private val ocr = FirebaseVision.getInstance().onDeviceTextRecognizer
+
     // Returns new found folders
     private fun syncFoldersIndex(realm: Realm, paths: List<String>): List<MemeFolder> {
         val newFolders = addNewFolders(realm, paths)
@@ -247,9 +249,7 @@ class Memebase {
             .equalTo(Meme.IS_SCANNED, false).findAll()
         if (notScannedMemes.count() > 0) {
             val meme = notScannedMemes.first()!!
-            val bitmap = BitmapFactory.decodeFile(meme.filePath)
-            val fireImage = FirebaseVisionImage.fromBitmap(bitmap)
-            val ocr = FirebaseVision.getInstance().onDeviceTextRecognizer
+            val fireImage = FirebaseVisionImage.fromBitmap(BitmapFactory.decodeFile(meme.filePath))
             ocr.processImage(fireImage)
                 .addOnSuccessListener { fireText ->
                     if (scanningCanceled) {
@@ -267,6 +267,7 @@ class Memebase {
                 }
                 .addOnFailureListener { e ->
                     e.printStackTrace()
+                    syncFolder(realm, folder) {} // Probably something wrong with current index if error occurred
                 }
                 .continueWith {
                     if (scanningCanceled) {
