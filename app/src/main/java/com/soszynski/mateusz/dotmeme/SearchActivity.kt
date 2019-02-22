@@ -30,10 +30,10 @@ class SearchActivity : AppCompatActivity() {
         realm = Realm.getDefaultInstance()
 
         button_enter.setOnClickListener {
-            val query = editText_search.text
+            val query = editText_search.text.toString()
             if (query.isNotEmpty()) {
                 val finalList = Memebase()
-                    .search(realm, query.toString())
+                    .search(realm, query)
                     .map(Meme::filePath)
 
                 memes = finalList

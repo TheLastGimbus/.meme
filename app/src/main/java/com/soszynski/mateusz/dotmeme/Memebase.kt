@@ -8,7 +8,6 @@ import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import io.realm.Case
 import io.realm.Realm
-import io.realm.RealmResults
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.io.File
@@ -300,22 +299,28 @@ class Memebase {
     fun search(
         realm: Realm,
         query: String,
-        folders: RealmResults<MemeFolder>? = realm.where(MemeFolder::class.java).findAll()
+        folders: List<MemeFolder> = realm.where(MemeFolder::class.java).findAll().toList()
     ): List<Meme> {
+        val start = System.currentTimeMillis()
+        var searchedMemesCount = 0
         val memeList = mutableListOf<Meme>()
 
         val keywords = query.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        if (folders != null) {
-            for (folder in folders) {
-                for (keyword in keywords) {
-                    memeList.addAll(
-                        folder.memes.where()
-                            .contains(Meme.RAW_TEXT, keyword, Case.INSENSITIVE)
-                            .findAll()
-                    )
-                }
+        for (folder in folders) {
+            searchedMemesCount += folder.memes.count()
+            for (keyword in keywords) {
+                memeList.addAll(
+                    folder.memes.where()
+                        .contains(Meme.RAW_TEXT, keyword, Case.INSENSITIVE)
+                        .findAll()
+                )
             }
         }
+        // We could report this to Firebase in the future
+        Log.i(
+            TAG,
+            "Search took ${System.currentTimeMillis() - start}ms, ${memeList.count()} results in $searchedMemesCount memes total"
+        )
         return memeList
     }
 
