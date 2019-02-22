@@ -10,7 +10,8 @@ import io.realm.Realm
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 
-class MemeManagerIntentService : IntentService("MemeManagerIntentService") {
+class MemeManagerIntentService : IntentService("MemeManagerIntentService"),
+    SharedPreferences.OnSharedPreferenceChangeListener {
     lateinit var realm: Realm
     private val memebase = Memebase()
     private lateinit var prefs: SharedPreferences
@@ -20,12 +21,14 @@ class MemeManagerIntentService : IntentService("MemeManagerIntentService") {
         super.onCreate()
         realm = Realm.getDefaultInstance()
         prefs = defaultSharedPreferences
+        prefs.registerOnSharedPreferenceChangeListener(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         stopForeground(true)
         realm.close()
+        prefs.unregisterOnSharedPreferenceChangeListener(this)
     }
 
     override fun onHandleIntent(intent: Intent?) {
@@ -50,6 +53,12 @@ class MemeManagerIntentService : IntentService("MemeManagerIntentService") {
         return Service.START_REDELIVER_INTENT
     }
 
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (key == Prefs.PREF_SCANNING_PAUSED) {
+            memebase.scanningCanceled = prefs.getBoolean(Prefs.PREF_SCANNING_PAUSED, Prefs.PREF_SCANNING_PAUSED_default)
+        }
+    }
+
     private fun handleActionSyncAll() {
         memebase.syncAllFolders(realm, this) {
             Log.i(TAG, "Global sync finished!")
@@ -62,7 +71,11 @@ class MemeManagerIntentService : IntentService("MemeManagerIntentService") {
     }
 
     private fun recursiveScanAllFolders(finished: () -> Unit) {
-        if (prefs.getBoolean(Prefs.PREF_SCANNING_PAUSED, false)) {
+        if (
+            prefs.getBoolean(Prefs.PREF_SCANNING_PAUSED, Prefs.PREF_SCANNING_PAUSED_default)
+            ||
+            memebase.scanningCanceled
+        ) {
             stopForeground(true)
             finished()
             return
