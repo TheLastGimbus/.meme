@@ -7,7 +7,7 @@ Maybe tags and labels will be added in the future.
 
 License
 -------
-    Copyright 2019-present Mateusz Soszyński
+    Copyright 2019 Mateusz Soszyński
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
