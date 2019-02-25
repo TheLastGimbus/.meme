@@ -1,8 +1,8 @@
 package com.soszynski.mateusz.dotmeme
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
+import android.support.v4.content.FileProvider
 import android.support.v7.app.AppCompatActivity
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_big_image.*
@@ -34,7 +34,12 @@ class BigImageActivity : AppCompatActivity() {
             button_share.setOnClickListener {
                 val intent = Intent(Intent.ACTION_SEND)
                 intent.type = "image/${file.extension}"
-                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file))
+                val uri = FileProvider.getUriForFile(
+                    this,
+                    applicationContext.packageName + ".provider",
+                    file
+                )
+                intent.putExtra(Intent.EXTRA_STREAM, uri)
                 startActivity(Intent.createChooser(intent, "Share meme"))
             }
         }
