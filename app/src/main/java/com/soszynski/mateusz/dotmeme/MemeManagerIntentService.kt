@@ -10,6 +10,11 @@ import io.realm.Realm
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 
+
+/**
+ * Main service that will do all the job of syncing memes in the background.
+ */
+
 class MemeManagerIntentService : IntentService("MemeManagerIntentService"),
     SharedPreferences.OnSharedPreferenceChangeListener {
     lateinit var realm: Realm

@@ -5,6 +5,15 @@ import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 import io.realm.annotations.Required
 
+/**
+ * [RealmObject] class containing one meme.
+ *
+ * @property filePath path to meme file on device.
+ * @property rawText raw text from ocr, without processing or autocorrection.
+ * @property labels tags or labels to memes. For example, dog, man, jacket, smile, snow etc.
+ * @property isScanned [Boolean] whether meme was already scanned.
+ * @property ocrVersion it's not any official version. If OCR gets better, we will just +1 this, and re-scan all old.
+ */
 open class Meme : RealmObject() {
     @PrimaryKey
     @Required
@@ -14,8 +23,6 @@ open class Meme : RealmObject() {
     var labels: String = ""
     var isScanned: Boolean = false
 
-    // This isn't any official version.
-    // If OCR gets better, we will +1 this and re-scan all older ones.
     var ocrVersion = 1
 
     companion object {
@@ -27,6 +34,14 @@ open class Meme : RealmObject() {
     }
 }
 
+/**
+ * [RealmObject] class containing one folder with images - or memes.
+ *
+ * @property folderPath path to folder on device.
+ * @property isScannable [Boolean] whether to scan [memes] inside this folder or not.
+ * @property sdCard [Boolean] whether this folder is on SD card.
+ * @property memes [RealmList] of memes inside this folder.
+ */
 open class MemeFolder : RealmObject() {
     @PrimaryKey
     @Required
@@ -42,7 +57,10 @@ open class MemeFolder : RealmObject() {
         val SD_CARD = "sdCard"
         val MEMES = "memes"
 
-
+        /**
+         * Companion function to check if all [Meme]s inside given [MemeFolder] are scanned.
+         * @param folder folder to check.
+         */
         fun isFolderFullyScanned(folder: MemeFolder): Boolean {
             return folder.memes.where().equalTo(Meme.IS_SCANNED, false).count().toInt() == 0
         }

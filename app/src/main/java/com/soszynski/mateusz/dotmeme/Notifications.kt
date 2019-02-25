@@ -11,7 +11,7 @@ import android.support.v4.app.NotificationCompat
 import androidx.annotation.RequiresApi
 
 
-/*
+/**
  * All stuff related to notifications.
  */
 
@@ -26,6 +26,13 @@ class Notifications {
     }
 
     // TODO: Change placeholders to fancy things
+    /**
+     * @param ctx [Context]
+     * @param folderName name of folder that is currently being scanned.
+     * @param progress number of scanned memes.
+     * @param max number of all memes to scan.
+     * @return notification indicating that scanning memes is in progress.
+     */
     fun getScanningForegroundNotification(
         ctx: Context,
         folderName: String?,

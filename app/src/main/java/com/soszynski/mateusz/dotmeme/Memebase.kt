@@ -13,13 +13,11 @@ import org.jetbrains.anko.uiThread
 import java.io.File
 
 
-/*
- * Almost all things related to database of memes.
+/**
+ * This class contains almost all things related to database of memes.
+ * If you want to do any work with database - do it here.
  *
- * All functions here can't stop uiThread.
- * All must be done by using doAsync, context and callbacks.
- *
- * Do I need to say that almost all of this requires READ_EXTERNAL_MEMORY permission?
+ * All functions don't take long enough to stop uiThread. If they take long, they use their own doAsync and callbacks.
  */
 
 class Memebase {
@@ -27,7 +25,7 @@ class Memebase {
         const val TAG = "Memebase class"
     }
 
-    lateinit var scanningFileObserver: FileObserver
+    private lateinit var scanningFileObserver: FileObserver
 
     var isSyncing = false
     var isScanning = false
@@ -35,14 +33,28 @@ class Memebase {
 
     private val ocr = FirebaseVision.getInstance().onDeviceTextRecognizer
 
-    // Returns new found folders
+    /**
+     * This function synchronizes folders index on database.
+     *
+     * @param realm
+     * @param paths list of paths on device that contain photos.
+     *
+     * @return new folders. This can be used to ask user whether to sync those new folders.
+     */
     private fun syncFoldersIndex(realm: Realm, paths: List<String>): List<MemeFolder> {
         val newFolders = addNewFolders(realm, paths)
         deleteNotExistingFolders(realm, paths)
         return newFolders
     }
 
-    // Discover new folders and add them to database.
+    /**
+     * Discover new folders and add them to database.
+     *
+     * @param realm
+     * @param devicePaths list of paths on device that contain photos.
+     *
+     * @return new folders. This can be used to ask user whether to sync those new folders.
+     */
     private fun addNewFolders(realm: Realm, devicePaths: List<String>): List<MemeFolder> {
         val newFound: MutableList<MemeFolder> = mutableListOf()
         realm.executeTransactionAsync { realm ->
@@ -63,7 +75,12 @@ class Memebase {
         return newFound.toList()
     }
 
-    // Delete folders that are still in database, but where deleted on device.
+    /**
+     * Delete folders that are still in database, but where deleted on device.
+     *
+     * @param realm
+     * @param devicePaths list of paths on device that contain photos.
+     */
     private fun deleteNotExistingFolders(realm: Realm, devicePaths: List<String>) {
         realm.executeTransaction { realm ->
             val result =
@@ -76,12 +93,17 @@ class Memebase {
         }
     }
 
-    // This only updates index in database. Does't actually scan any image.
-    // Returns new memes that were added.
+    /**
+     *  This only updates index in database. Does't scan any image
+     *
+     *  @param realm
+     *  @param folder takes [MemeFolder] to sync [Meme]s inside it.
+     *  @param finished callback with new [Meme]s that were added to database index.
+     */
     private fun syncFolder(
         realm: Realm,
         folder: MemeFolder,
-        finished: (List<Meme>) -> Unit
+        finished: (newMemes: List<Meme>) -> Unit
     ) {
         val folderPath = File(folder.folderPath) // Realms can't go between threads :/
         doAsync {
@@ -98,11 +120,20 @@ class Memebase {
         }
     }
 
+    /**
+     * Adds new [Meme]s found on device to given [MemeFolder]
+     *
+     * @param realm
+     * @param folder [MemeFolder] where new memes will be added.
+     * @param filesList list of image files inside [folder]. It is separate for better optimization,
+     *        since getting list of 5000 images from folder can take some time.
+     * @param finished callback when finished with new [Meme]s that were added to database index.
+     */
     private fun addNewMemesToFolder(
         realm: Realm,
         folder: MemeFolder,
         filesList: List<File>, // for better optimization
-        finished: (List<Meme>) -> Unit
+        finished: (newMemes: List<Meme>) -> Unit
     ) {
         val newMemes = mutableListOf<Meme>()
 
@@ -140,6 +171,15 @@ class Memebase {
         )
     }
 
+    /**
+     * Deletes [Meme]s from database that weren't found on device.
+     *
+     * @param realm
+     * @param folder [MemeFolder] where memes will be deleted.
+     * @param filesList list of image files inside [folder]. It is separate for better optimization,
+     *        since getting list of 5000 images from folder can take some time.
+     * @param finished callback when finished.
+     */
     private fun deleteNotExistingMemesFromFolder(
         realm: Realm,
         folder: MemeFolder,
@@ -173,7 +213,13 @@ class Memebase {
         )
     }
 
-    // You should call this only after syncing folders index
+    /**
+     * Synchronizes whole index. All [MemeFolder]s and all [Meme]s inside them.
+     *
+     * @param realm [Realm]
+     * @param ctx [Context]
+     * @param finished
+     */
     fun syncAllFolders(realm: Realm, ctx: Context, finished: () -> Unit) {
         isSyncing = true
         doAsync {
@@ -192,6 +238,13 @@ class Memebase {
         }
     }
 
+    /**
+     * Recursive part of [syncAllFolders].
+     *
+     * @param realm [Realm]
+     * @param foldersToSync list of [MemeFolder]s that are left for syncing.
+     * @param finished callback when finished.
+     */
     private fun syncAllFoldersRecursive(
         realm: Realm,
         foldersToSync: List<MemeFolder>,
@@ -209,6 +262,16 @@ class Memebase {
         }
     }
 
+    /**
+     * Scans whole [folder] recursively.
+     * Make sure to sync [folder] before calling this.
+     *
+     * @param realm [Realm]
+     * @param folder [MemeFolder] to scan.
+     * @param progress callback when progress was made. First val contains number of all [Meme]s in [folder],
+     *                 second is number of [Meme]s that are already scanned.
+     * @param finished callback when whole scanning is finished. It's also called when [scanningCanceled] is true.
+     */
     fun scanFolder(
         realm: Realm,
         folder: MemeFolder,
@@ -296,6 +359,15 @@ class Memebase {
     }
 
     // TODO: Make better, more flexible search
+    /**
+     * Search for memes.
+     *
+     * @param realm [Realm]
+     * @param query text to search.
+     * @param folders [MemeFolder]s to scan. Default value is all of them.
+     *
+     * @return list of found [Meme]s
+     */
     fun search(
         realm: Realm,
         query: String,

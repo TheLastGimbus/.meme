@@ -11,9 +11,9 @@ import android.support.v4.content.ContextCompat
 import android.util.Log
 import java.io.File
 
-/*
- * This is class where I put all the annoying, boilerplate things.
- * But it isn't meant to handle permissions or things like that, so do that manually when you use it.
+/**
+ * This is class where are all the annoying, boilerplate things.
+ * But it isn't meant to handle permissions and async, so do that manually when you use it.
  */
 
 class PainKiller {
@@ -22,7 +22,12 @@ class PainKiller {
         val imageFileExtensions = listOf("jpg", "png", "jpeg", "jpe", "bmp")
     }
 
-    // Requires READ_EXTERNAL_STORAGE permission.
+    // TODO: hiddenFolders flag
+    /**
+     * Requires READ_EXTERNAL_STORAGE permission.
+     *
+     * @return all folders with images found on device.
+     */
     fun getAllFoldersWithImages(ctx: Context): List<File> {
         val dirs =
             searchForPhotoDirs(ctx, Environment.getExternalStorageDirectory()) +
@@ -36,6 +41,9 @@ class PainKiller {
         return dirs.toList()
     }
 
+    /**
+     * @return all images inside given [folder].
+     */
     fun getAllImagesInFolder(folder: File): List<File> {
         if (!folder.isDirectory) {
             return emptyList()
@@ -46,6 +54,11 @@ class PainKiller {
         }.toList()
     }
 
+    /**
+     * Recursively searching for folders containing images.
+     *
+     * @return list of found folders.
+     */
     private fun searchForPhotoDirs(ctx: Context, path: File): List<File> {
         val dirs = mutableListOf<File>()
 
@@ -74,9 +87,11 @@ class PainKiller {
     }
 
 
-    // I don't fucking know what does it do.
-    // It's copied from internet. And it works. That's all I care about.
-    // Btw it requires READ_EXTERNAL_STORAGE permission.
+    /**
+     * Requires READ_EXTERNAL_STORAGE permission.
+     *
+     * @return real path from given [Uri]
+     */
     fun getRealPathFromUri(ctx: Context, uri: Uri): String {
         var filePath = ""
         val wholeID = DocumentsContract.getDocumentId(uri)
