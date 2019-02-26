@@ -59,6 +59,7 @@ dependencies {
 
     implementation 'com.ablanco.imageprovider:imageprovider:0.1.0' // only temporary
     implementation 'android.arch.navigation:navigation-fragment:1.0.0-beta01'
+    implementation 'org.apache.commons:commons-lang3:3.8.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -6,8 +6,8 @@ import android.os.FileObserver
 import android.util.Log
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
-import io.realm.Case
 import io.realm.Realm
+import org.apache.commons.lang3.StringUtils
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.io.File
@@ -358,7 +358,6 @@ class Memebase {
 
     }
 
-    // TODO: Make better, more flexible search
     /**
      * Search for memes.
      *
@@ -374,26 +373,32 @@ class Memebase {
         folders: List<MemeFolder> = realm.where(MemeFolder::class.java).findAll().toList()
     ): List<Meme> {
         val start = System.currentTimeMillis()
-        var searchedMemesCount = 0
-        val memeList = mutableListOf<Meme>()
+        val memeList = mutableListOf<Pair<Int, Meme>>()
 
-        val keywords = query.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        val keywords = StringUtils.stripAccents(query).split(" ".toRegex()).dropLastWhile { it.isEmpty() }
         for (folder in folders) {
-            searchedMemesCount += folder.memes.count()
-            for (keyword in keywords) {
-                memeList.addAll(
-                    folder.memes.where()
-                        .contains(Meme.RAW_TEXT, keyword, Case.INSENSITIVE)
-                        .findAll()
-                )
+            for (meme in folder.memes) {
+                var pair = Pair(0, meme)
+                val strippedText = StringUtils.stripAccents(meme.rawText)
+                for (keyword in keywords) {
+                    if (strippedText.contains(keyword, true)) {
+                        pair = pair.copy(first = pair.first + 1)
+                    }
+                }
+
+                if (pair.first > 0) {
+                    memeList.add(pair)
+                }
             }
         }
         // We could report this to Firebase in the future
-        Log.i(
-            TAG,
-            "Search took ${System.currentTimeMillis() - start}ms, ${memeList.count()} results in $searchedMemesCount memes total"
+        Log.i(TAG, "Search took ${System.currentTimeMillis() - start}ms, " +
+                "${memeList.count()} results in ${folders.sumBy { it.memes.count() }} memes total"
         )
+
         return memeList
+            .sortedByDescending { it.first }
+            .map { return@map it.second }
     }
 
 }

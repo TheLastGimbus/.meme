@@ -4,14 +4,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v4.content.FileProvider
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import com.squareup.picasso.Picasso
+import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_big_image.*
+import org.apache.commons.lang3.StringUtils
 import java.io.File
 
 class BigImageActivity : AppCompatActivity() {
+    lateinit var realm: Realm
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        realm = Realm.getDefaultInstance()
         setContentView(R.layout.activity_big_image)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
@@ -42,6 +47,20 @@ class BigImageActivity : AppCompatActivity() {
                 intent.putExtra(Intent.EXTRA_STREAM, uri)
                 startActivity(Intent.createChooser(intent, "Share meme"))
             }
+
+
+            val meme = realm.where(Meme::class.java).equalTo(Meme.FILE_PATH, srcStr).findFirst()
+            val niceText = meme?.rawText?.replace("\n", "\n    ")
+            Log.i(
+                TAG, "Meme data: \n" +
+                        "Path: ${meme?.filePath} \n" +
+                        "Ocr ver.: ${meme?.ocrVersion} \n" +
+                        "Text: \n" +
+                        "    $niceText \n" +
+                        "Castrated text: \n" +
+                        "    ${StringUtils.stripAccents(niceText)}" +
+                        "Labels: ${meme?.labels}"
+            )
         }
     }
 
