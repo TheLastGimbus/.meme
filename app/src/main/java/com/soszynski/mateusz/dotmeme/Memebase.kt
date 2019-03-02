@@ -360,6 +360,8 @@ class Memebase {
 
     /**
      * Search for memes.
+     * This function is exception from "no long functions in Memebase class" rule.
+     * It's just easier to migrate Realm and all folders to different thread when calling it.
      *
      * @param realm [Realm]
      * @param query text to search.

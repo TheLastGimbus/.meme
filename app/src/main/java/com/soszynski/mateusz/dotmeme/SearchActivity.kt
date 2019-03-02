@@ -12,6 +12,8 @@ import android.widget.ImageView
 import com.squareup.picasso.Picasso
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_search.*
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 import java.io.File
 
 
@@ -31,13 +33,21 @@ class SearchActivity : AppCompatActivity() {
 
         button_enter.setOnClickListener {
             val query = editText_search.text.toString()
-            if (query.isNotEmpty()) {
-                val finalList = Memebase()
-                    .search(realm, query)
-                    .map(Meme::filePath)
+            if (query.isNotBlank()) {
+                button_enter.setImageResource(R.drawable.ic_loading_black_24dp)
 
-                memes = finalList
-                gridView_results.adapter = ImageAdapter()
+                val config = realm.configuration // Thread migration
+                doAsync {
+                    val realm = Realm.getInstance(config) // Thread migration
+                    val finalList = Memebase()
+                        .search(realm, query)
+                        .map(Meme::filePath)
+                    uiThread {
+                        memes = finalList
+                        gridView_results.adapter = ImageAdapter()
+                        button_enter.setImageResource(R.drawable.ic_search_black_24dp)
+                    }
+                }
             }
         }
 
