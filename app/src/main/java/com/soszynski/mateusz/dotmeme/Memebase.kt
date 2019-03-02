@@ -6,6 +6,7 @@ import android.os.FileObserver
 import android.util.Log
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
+import com.google.firebase.perf.FirebasePerformance
 import io.realm.Realm
 import org.apache.commons.lang3.StringUtils
 import org.jetbrains.anko.doAsync
@@ -105,6 +106,8 @@ class Memebase {
         folder: MemeFolder,
         finished: (newMemes: List<Meme>) -> Unit
     ) {
+        val trace = FirebasePerformance.getInstance().newTrace("memebase_sync_folder")
+        trace.start()
         val folderPath = File(folder.folderPath) // Realms can't go between threads :/
         doAsync {
             val imagesInFolderList = PainKiller().getAllImagesInFolder(folderPath)
@@ -112,7 +115,11 @@ class Memebase {
                 deleteNotExistingMemesFromFolder(realm, folder, imagesInFolderList) {
                     // when finished
                     addNewMemesToFolder(realm, folder, imagesInFolderList) { newMemes ->
-                        // when finished
+                        // finished
+                        trace.putMetric("folder_images_count", folder.memes.count().toLong())
+                        trace.putMetric("folder_new_memes", newMemes.count().toLong())
+                        trace.stop()
+
                         finished(newMemes)
                     }
                 }
@@ -230,6 +237,7 @@ class Memebase {
                 val foldersToSync = realm.where(MemeFolder::class.java)
                     .equalTo(MemeFolder.IS_SCANNABLE, true).findAll()
                 syncAllFoldersRecursive(realm, foldersToSync) {
+                    // finished
                     isSyncing = false
                     finished()
                 }
@@ -374,7 +382,9 @@ class Memebase {
         query: String,
         folders: List<MemeFolder> = realm.where(MemeFolder::class.java).findAll().toList()
     ): List<Meme> {
-        val start = System.currentTimeMillis()
+        val trace = FirebasePerformance.getInstance().newTrace("memebase_search")
+        trace.start()
+
         val memeList = mutableListOf<Pair<Int, Meme>>()
 
         val keywords = StringUtils.stripAccents(query).split(" ".toRegex()).dropLastWhile { it.isEmpty() }
@@ -393,14 +403,16 @@ class Memebase {
                 }
             }
         }
-        // We could report this to Firebase in the future
-        Log.i(TAG, "Search took ${System.currentTimeMillis() - start}ms, " +
-                "${memeList.count()} results in ${folders.sumBy { it.memes.count() }} memes total"
-        )
 
-        return memeList
+        val finalList = memeList
             .sortedByDescending { it.first }
             .map { return@map it.second }
+
+        trace.putMetric("memes_all_count", folders.sumBy { it.memes.count() }.toLong())
+        trace.putMetric("memes_found_count", memeList.count().toLong())
+        trace.stop()
+
+        return finalList
     }
 
 }

@@ -9,6 +9,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.support.v4.content.ContextCompat
 import android.util.Log
+import com.google.firebase.perf.FirebasePerformance
 import java.io.File
 
 /**
@@ -22,13 +23,15 @@ class PainKiller {
         val imageFileExtensions = listOf("jpg", "png", "jpeg", "jpe", "bmp")
     }
 
-    // TODO: hiddenFolders flag
+
     /**
      * Requires READ_EXTERNAL_STORAGE permission.
      *
      * @return all folders with images found on device.
      */
-    fun getAllFoldersWithImages(ctx: Context): List<File> {
+    fun getAllFoldersWithImages(ctx: Context, includeHidden: Boolean = false): List<File> {
+        val trace = FirebasePerformance.getInstance().newTrace("painkiller_get_all_folders_with_images")
+        trace.start()
         val dirs =
             searchForPhotoDirs(ctx, Environment.getExternalStorageDirectory()) +
                     searchForPhotoDirs(ctx, File("/storage"))
@@ -37,6 +40,8 @@ class PainKiller {
             prettyDirs += dir.absolutePath + "\n"
         }
         Log.i(TAG, "All folders with photos: \n$prettyDirs")
+
+        trace.stop()
 
         return dirs.toList()
     }
@@ -59,7 +64,7 @@ class PainKiller {
      *
      * @return list of found folders.
      */
-    private fun searchForPhotoDirs(ctx: Context, path: File): List<File> {
+    private fun searchForPhotoDirs(ctx: Context, path: File, includeHidden: Boolean = false): List<File> {
         val dirs = mutableListOf<File>()
 
         val childrenPaths = path.listFiles()
@@ -68,12 +73,16 @@ class PainKiller {
         }
 
         for (file in childrenPaths) {
-            if (file.isHidden) {
+            if (file.isHidden && !includeHidden) {
                 continue
             }
             if (file.isDirectory) {
-                dirs.addAll(searchForPhotoDirs(ctx, file)) // recursion
-            } else if (file.isFile && isFileImage(file)) {
+                dirs.addAll(searchForPhotoDirs(ctx, file, includeHidden)) // recursion
+            } else if (
+                file.isFile &&
+                isFileImage(file) &&
+                (includeHidden || !File(file.parent, ".nomedia").exists())
+            ) {
                 dirs.add(path)
                 break
             }
