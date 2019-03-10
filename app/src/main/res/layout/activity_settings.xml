@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:fitsSystemWindows="true"
     tools:context=".SettingsActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -24,13 +26,17 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/colorBackground"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <!-- Main Activity screen -->
 
         <fragment
             android:id="@+id/fragment"
             android:name="com.soszynski.mateusz.dotmeme.FoldersSettingsFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
+        <!-- Main Activity screen -->
     </FrameLayout>
 
 </android.support.design.widget.CoordinatorLayout>

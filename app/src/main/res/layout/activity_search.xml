@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:fitsSystemWindows="true"
     tools:context=".SearchActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -24,8 +26,10 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/colorBackground"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <!-- Main Activity screen -->
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -79,6 +83,8 @@
             </LinearLayout>
 
         </android.support.constraint.ConstraintLayout>
+        <!-- Main Activity screen -->
+
     </FrameLayout>
 
 </android.support.design.widget.CoordinatorLayout>
