@@ -13,4 +13,9 @@
         android:icon="@drawable/ic_menu_send"
         android:title="@string/navigation_drawer_item_send_feedback" />
 
+    <item
+        android:id="@+id/nav_dev_stuff"
+        android:icon="@drawable/ic_developer_mode_black_24dp"
+        android:title="Dev Stuff" />
+
 </menu>

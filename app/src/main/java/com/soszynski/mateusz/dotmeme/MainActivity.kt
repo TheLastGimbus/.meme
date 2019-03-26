@@ -10,10 +10,6 @@ import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
-import com.ablanco.imageprovider.ImageProvider
-import com.ablanco.imageprovider.ImageSource
-import com.google.firebase.ml.vision.FirebaseVision
-import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import io.doorbell.android.Doorbell
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_main.*
@@ -67,53 +63,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         permission()
 
-        switch_scanning_paused.isChecked = prefs.getBoolean(Prefs.PREF_SCANNING_PAUSED, false)
-        switch_scanning_paused.setOnCheckedChangeListener { _, isChecked ->
-            prefs.edit()
-                .putBoolean(Prefs.PREF_SCANNING_PAUSED, isChecked)
-                .apply()
-        }
-        prefChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == Prefs.PREF_SCANNING_PAUSED) {
-                switch_scanning_paused.isChecked = prefs.getBoolean(Prefs.PREF_SCANNING_PAUSED, false)
-            }
-        }
-        prefs.registerOnSharedPreferenceChangeListener(prefChangeListener)
 
-        button_scan.setOnClickListener {
-            textView_text.text = "Wait..."
-
-            ImageProvider(this).getImage(ImageSource.GALLERY) { bitmap ->
-                if (bitmap != null) {
-                    imageView_meme.setImageBitmap(bitmap)
-
-                    val fireImage = FirebaseVisionImage.fromBitmap(bitmap)
-                    val ocr = FirebaseVision.getInstance().onDeviceTextRecognizer
-
-                    ocr.processImage(fireImage)
-                        .addOnSuccessListener { fireText ->
-                            textView_text.text = fireText.text
-                        }
-                        .addOnFailureListener { e ->
-                            textView_text.text = "ERROR"
-                            e.printStackTrace()
-                        }
-                }
-
-            }
-        }
-
-        button_settings.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
-        }
-
-        button_search.setOnClickListener {
-            startActivity(Intent(this, SearchActivity::class.java))
-        }
-
-        button_sync.setOnClickListener {
-            MemeManagerIntentService.startActionSyncAll(this)
-        }
 
     }
 
@@ -137,6 +87,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     10050,
                     "Fpg9YDZGtEgYzsbCHLRgErNms46Em6XiJpl0NtscLzH246DrKRLKwurjSEdbaDLP"
                 ).show()  // please don't use my private key ;)
+            }
+            R.id.nav_dev_stuff -> {
+                val intent = Intent(this, DevStuffActivity::class.java)
+                startActivity(intent)
             }
         }
 
