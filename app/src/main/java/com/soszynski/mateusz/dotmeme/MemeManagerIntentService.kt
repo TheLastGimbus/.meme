@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
-import com.google.firebase.perf.FirebasePerformance
 import io.realm.Realm
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
@@ -102,14 +101,10 @@ class MemeManagerIntentService : IntentService("MemeManagerIntentService"),
 
         val folderName = File(folderToScan.folderPath).name
 
-        val trace = FirebasePerformance.getInstance().newTrace("meme_manager_memes_scan_time")
-        trace.start()
         memebase.scanFolder(
             realm, folderToScan,
             { max, progress ->
                 // progress
-                trace.incrementMetric("memes_scanned_count", 1)
-
                 val notification = Notifications().getScanningForegroundNotification(
                     this,
                     folderName,
@@ -121,7 +116,6 @@ class MemeManagerIntentService : IntentService("MemeManagerIntentService"),
             },
             {
                 // finished
-                trace.stop()
                 Log.i(TAG, "Finished scanning folder $folderName")
                 recursiveScanAllFolders(finished)
             })

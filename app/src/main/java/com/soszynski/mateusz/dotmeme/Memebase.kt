@@ -318,8 +318,17 @@ class Memebase {
         val notScannedMemes = folder.memes.where()
             .equalTo(Meme.IS_SCANNED, false).findAll()
         if (notScannedMemes.count() > 0) {
+            val trace = FirebasePerformance.getInstance().newTrace("memebase_meme_scan")
+            trace.start()
+
             val meme = notScannedMemes.first()!!
-            val fireImage = FirebaseVisionImage.fromBitmap(BitmapFactory.decodeFile(meme.filePath))
+            val bitmap = BitmapFactory.decodeFile(meme.filePath)
+
+            trace.putMetric("bitmap_size_bytes", bitmap.byteCount.toLong())
+            trace.putMetric("bitmap_size_height", bitmap.height.toLong())
+            trace.putMetric("bitmap_size_width", bitmap.width.toLong())
+
+            val fireImage = FirebaseVisionImage.fromBitmap(bitmap)
             ocr.processImage(fireImage)
                 .addOnSuccessListener { fireText ->
                     if (scanningCanceled) {
@@ -340,6 +349,8 @@ class Memebase {
                     syncFolder(realm, folder) {} // Probably something wrong with current index if error occurred
                 }
                 .continueWith {
+                    trace.stop()
+
                     if (scanningCanceled) {
                         scanningFileObserver.stopWatching()
                         isScanning = false
