@@ -18,6 +18,9 @@ import org.jetbrains.anko.defaultSharedPreferences
  */
 
 class DevStuffActivity : AppCompatActivity() {
+    companion object {
+        const val TAG = "DevStuffActivity"
+    }
 
     private lateinit var realm: Realm
 
