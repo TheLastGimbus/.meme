@@ -21,6 +21,8 @@ import io.doorbell.android.Doorbell
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.defaultSharedPreferences
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 import java.io.File
 
 
@@ -34,15 +36,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var prefChangeListener: SharedPreferences.OnSharedPreferenceChangeListener
 
 
-    fun getMemeRoll(): List<File> {
-        val images = realm.where(Meme::class.java).findAll()
-        val filesMutableList = mutableListOf<File>()
-        for (meme in images) {
-            filesMutableList.add(File(meme.filePath))
-        }
-        filesMutableList.sortByDescending { it.lastModified() }
+    private fun getMemeRoll(result: (roll: List<File>) -> Unit) {
+        doAsync {
+            realm = Realm.getDefaultInstance() // so we don't mess up between threads
+            val images = realm
+                .where(MemeFolder::class.java)
+                .equalTo(MemeFolder.IS_SCANNABLE, true)
+                .findAll()
+                .map { it.memes }
+                .flatten()
 
-        return filesMutableList.toList()
+            val filesMutableList = mutableListOf<File>()
+            for (meme in images) {
+                filesMutableList.add(File(meme.filePath))
+            }
+            filesMutableList.sortByDescending { it.lastModified() }
+
+            uiThread {
+                result(filesMutableList.toList())
+            }
+        }
     }
 
     inner class SquareImageView : ImageView {
@@ -126,14 +139,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         permission()
 
 
-        val memeRoll = getMemeRoll()
-        gridView_meme_roll.adapter = ImageAdapter(memeRoll)
-        gridView_meme_roll.setOnItemClickListener { parent, view, position, id ->
+        fab.setOnClickListener {
+            startActivity(Intent(this, SearchActivity::class.java))
+        }
 
-            val intent = Intent(this, BigImageActivity::class.java).apply {
-                putExtra(BigImageActivity.IMAGE_SRC_PATH, memeRoll[id.toInt()].absolutePath)
+        getMemeRoll { memeRoll ->
+            gridView_meme_roll.adapter = ImageAdapter(memeRoll)
+            gridView_meme_roll.setOnItemClickListener { parent, view, position, id ->
+
+                val intent = Intent(this, BigImageActivity::class.java).apply {
+                    putExtra(BigImageActivity.IMAGE_SRC_PATH, memeRoll[id.toInt()].absolutePath)
+                }
+                startActivity(intent)
             }
-            startActivity(intent)
         }
     }
 

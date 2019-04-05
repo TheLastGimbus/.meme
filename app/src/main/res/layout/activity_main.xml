@@ -43,8 +43,8 @@
                 android:id="@+id/fab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="48dp"
-                android:layout_marginBottom="48dp"
+                android:layout_marginEnd="40dp"
+                android:layout_marginBottom="40dp"
                 android:src="@drawable/ic_search_black_24dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />

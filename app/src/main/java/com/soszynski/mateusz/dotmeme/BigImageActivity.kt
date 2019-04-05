@@ -58,7 +58,7 @@ class BigImageActivity : AppCompatActivity() {
                         "Text: \n" +
                         "    $niceText \n" +
                         "Castrated text: \n" +
-                        "    ${StringUtils.stripAccents(niceText)}" +
+                        "    ${StringUtils.stripAccents(niceText)}\n" +
                         "Labels: ${meme?.labels}"
             )
         }
