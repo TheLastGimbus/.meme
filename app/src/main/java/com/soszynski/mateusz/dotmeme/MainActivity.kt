@@ -148,7 +148,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             gridView_meme_roll.setOnItemClickListener { parent, view, position, id ->
 
                 val intent = Intent(this, BigImageActivity::class.java).apply {
-                    putExtra(BigImageActivity.IMAGE_SRC_PATH, memeRoll[id.toInt()].absolutePath)
+                    putExtra(BigImageActivity.IMAGES_SRC_PATH_ARRAY, memeRoll.map(File::getAbsolutePath).toTypedArray())
+                    putExtra(BigImageActivity.START_IMAGE_INDEX, position)
+
                 }
                 startActivity(intent)
             }

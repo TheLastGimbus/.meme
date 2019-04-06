@@ -53,7 +53,8 @@ class SearchActivity : AppCompatActivity() {
 
         gridView_results.setOnItemClickListener { parent, view, position, id ->
             val intent = Intent(this, BigImageActivity::class.java).apply {
-                putExtra(BigImageActivity.IMAGE_SRC_PATH, memes[id.toInt()])
+                putExtra(BigImageActivity.IMAGES_SRC_PATH_ARRAY, memes.toTypedArray())
+                putExtra(BigImageActivity.START_IMAGE_INDEX, position)
             }
             startActivity(intent)
         }
