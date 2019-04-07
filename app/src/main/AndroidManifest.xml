@@ -50,7 +50,6 @@
             android:name=".MemeManagerIntentService"
             android:exported="false" />
 
-        <activity android:name=".SearchActivity" />
     </application>
 
 </manifest>

@@ -77,10 +77,6 @@ class DevStuffActivity : AppCompatActivity() {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
-        button_search.setOnClickListener {
-            startActivity(Intent(this, SearchActivity::class.java))
-        }
-
         button_sync.setOnClickListener {
             MemeManagerIntentService.startActionSyncAll(this)
         }

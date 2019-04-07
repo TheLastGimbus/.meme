@@ -8,12 +8,13 @@ import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.app.ActivityCompat
 import android.support.v4.view.GravityCompat
-import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.util.AttributeSet
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import com.squareup.picasso.Picasso
@@ -35,11 +36,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private lateinit var prefChangeListener: SharedPreferences.OnSharedPreferenceChangeListener
 
+    var searchMode = false
+
 
     private fun getMemeRoll(result: (roll: List<File>) -> Unit) {
         doAsync {
-            realm = Realm.getDefaultInstance() // so we don't mess up between threads
-            val images = realm
+            val realmAsync = Realm.getDefaultInstance() // so we don't mess up between threads
+            val images = realmAsync
                 .where(MemeFolder::class.java)
                 .equalTo(MemeFolder.IS_SCANNABLE, true)
                 .findAll()
@@ -52,6 +55,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             filesMutableList.sortByDescending { it.lastModified() }
 
+            realmAsync.close()
             uiThread {
                 result(filesMutableList.toList())
             }
@@ -75,7 +79,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     }
 
-    inner class ImageAdapter(private val images: List<File>) : BaseAdapter() {
+    inner class ImageAdapter(val images: List<File>) : BaseAdapter() {
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val imageView: SquareImageView
@@ -115,19 +119,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    private fun showKeyboard() {
+        editText_search.requestFocus()
+        val input = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        input.showSoftInput(editText_search, InputMethodManager.SHOW_FORCED)
+    }
+
+    private fun hideKeyboard() {
+        val input = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        input.hideSoftInputFromWindow(editText_search.windowToken, 0)
+        editText_search.clearFocus()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(activity_main_toolbar)
-        val toggle = ActionBarDrawerToggle(
-            this,
-            drawer_layout,
-            activity_main_toolbar,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
-        )
-        drawer_layout.addDrawerListener(toggle)
-        toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
 
 
@@ -139,27 +145,88 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         permission()
 
 
-        fab.setOnClickListener {
-            startActivity(Intent(this, SearchActivity::class.java))
+        // TODO: Animation when loadin
+        // TODO: Search FAB works as search on keyboard when keyboard is shown
+        fab_search.setOnClickListener {
+            showKeyboard()
+        }
+
+        fab_go_up.setOnClickListener {
+            gridView_meme_roll.smoothScrollToPositionFromTop(0, 0, 350)
         }
 
         getMemeRoll { memeRoll ->
             gridView_meme_roll.adapter = ImageAdapter(memeRoll)
-            gridView_meme_roll.setOnItemClickListener { parent, view, position, id ->
-
-                val intent = Intent(this, BigImageActivity::class.java).apply {
-                    putExtra(BigImageActivity.IMAGES_SRC_PATH_ARRAY, memeRoll.map(File::getAbsolutePath).toTypedArray())
-                    putExtra(BigImageActivity.START_IMAGE_INDEX, position)
-
-                }
-                startActivity(intent)
+        }
+        gridView_meme_roll.setOnScrollChangeListener { _, _, _, _, _ ->
+            if (gridView_meme_roll.firstVisiblePosition > 15) {
+                fab_go_up.show()
+            } else {
+                fab_go_up.hide()
             }
+        }
+        gridView_meme_roll.setOnItemClickListener { parent, view, position, id ->
+            val intent = Intent(this, BigImageActivity::class.java).apply {
+                putExtra(
+                    BigImageActivity.IMAGES_SRC_PATH_ARRAY,
+                    (gridView_meme_roll.adapter as ImageAdapter)
+                        .images
+                        .map(File::getAbsolutePath)
+                        .toTypedArray()
+                )
+                putExtra(BigImageActivity.START_IMAGE_INDEX, position)
+
+            }
+            startActivity(intent)
+        }
+
+        button_nav_bar.setOnClickListener {
+            if (searchMode) {
+                onBackPressed()
+            } else {
+                drawer_layout.openDrawer(GravityCompat.START)
+            }
+        }
+
+
+        editText_search.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                hideKeyboard()
+                searchMode = true
+                button_nav_bar.setImageResource(R.drawable.ic_arrow_back_white_24dp)
+                gridView_meme_roll.adapter = ImageAdapter(emptyList())
+
+                val query = editText_search.text.toString()
+                if (query.isNotBlank()) {
+
+                    val config = realm.configuration // Thread migration
+                    doAsync {
+                        val realm = Realm.getInstance(config) // Thread migration
+                        val finalList = Memebase()
+                            .search(realm, query)
+                            .map(Meme::filePath)
+                        uiThread {
+                            gridView_meme_roll.adapter = ImageAdapter(finalList.map { File(it) })
+                        }
+                    }
+                }
+            }
+            return@setOnEditorActionListener true
         }
     }
 
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
+        } else if (searchMode) {
+            button_nav_bar.setImageResource(R.drawable.ic_dehaze_white_24dp)
+            editText_search.text.clear()
+            editText_search.clearFocus()
+            gridView_meme_roll.adapter = ImageAdapter(emptyList())
+            getMemeRoll { memeRoll ->
+                gridView_meme_roll.adapter = ImageAdapter(memeRoll)
+            }
+            searchMode = false
         } else {
             super.onBackPressed()
         }
