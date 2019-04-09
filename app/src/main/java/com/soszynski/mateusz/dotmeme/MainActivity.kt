@@ -17,6 +17,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.BaseAdapter
 import android.widget.ImageView
+import android.widget.ProgressBar
 import com.squareup.picasso.Picasso
 import io.doorbell.android.Doorbell
 import io.realm.Realm
@@ -145,7 +146,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         permission()
 
 
-        // TODO: Animation when loadin
         // TODO: Search FAB works as search on keyboard when keyboard is shown
         fab_search.setOnClickListener {
             showKeyboard()
@@ -156,6 +156,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         getMemeRoll { memeRoll ->
+            progressBar_loading.visibility = ProgressBar.GONE
+
             gridView_meme_roll.adapter = ImageAdapter(memeRoll)
         }
         gridView_meme_roll.setOnScrollChangeListener { _, _, _, _, _ ->
@@ -194,6 +196,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 hideKeyboard()
                 searchMode = true
                 button_nav_bar.setImageResource(R.drawable.ic_arrow_back_white_24dp)
+                progressBar_loading.visibility = ProgressBar.VISIBLE
                 gridView_meme_roll.adapter = ImageAdapter(emptyList())
 
                 val query = editText_search.text.toString()
@@ -207,6 +210,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             .map(Meme::filePath)
                         uiThread {
                             gridView_meme_roll.adapter = ImageAdapter(finalList.map { File(it) })
+                            progressBar_loading.visibility = ProgressBar.GONE
                         }
                     }
                 }
