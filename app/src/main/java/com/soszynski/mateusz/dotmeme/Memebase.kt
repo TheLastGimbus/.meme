@@ -327,6 +327,7 @@ class Memebase {
             trace.putMetric("bitmap_size_bytes", bitmap.byteCount.toLong())
             trace.putMetric("bitmap_size_height", bitmap.height.toLong())
             trace.putMetric("bitmap_size_width", bitmap.width.toLong())
+            trace.putMetric("bitmap_width_to_height_ratio", (bitmap.width / bitmap.height).toLong())
 
             val fireImage = FirebaseVisionImage.fromBitmap(bitmap)
             ocr.processImage(fireImage)
@@ -398,6 +399,8 @@ class Memebase {
 
         val memeList = mutableListOf<Pair<Int, Meme>>()
 
+        Log.i(TAG, "Begin of search, query: $query")
+
         val keywords = StringUtils.stripAccents(query).split(" ".toRegex()).dropLastWhile { it.isEmpty() }
         for (folder in folders) {
             for (meme in folder.memes) {
@@ -422,6 +425,8 @@ class Memebase {
         trace.putMetric("memes_all_count", folders.sumBy { it.memes.count() }.toLong())
         trace.putMetric("memes_found_count", memeList.count().toLong())
         trace.stop()
+
+        Log.i(TAG, "Memes found: ${trace.getLongMetric("memes_found_count")}")
 
         return finalList
     }
