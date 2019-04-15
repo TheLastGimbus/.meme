@@ -295,16 +295,15 @@ class Memebase {
             // keep in mind that this is different thread, we can't access realms there
             override fun onEvent(event: Int, file: String?) {
                 val wantedEvents = intArrayOf(
-                    FileObserver.CREATE,
-                    FileObserver.CLOSE_WRITE,
-                    FileObserver.CREATE,
-                    FileObserver.DELETE,
-                    FileObserver.DELETE_SELF,
-                    FileObserver.MODIFY,
-                    FileObserver.MOVED_FROM,
-                    FileObserver.MOVED_TO,
-                    FileObserver.MOVE_SELF,
-                    FileObserver.ATTRIB
+                    CREATE,
+                    CLOSE_WRITE,
+                    DELETE,
+                    DELETE_SELF,
+                    MODIFY,
+                    MOVED_FROM,
+                    MOVED_TO,
+                    MOVE_SELF,
+                    ATTRIB
                 )
                 if (wantedEvents.contains(event)) {
                     Log.d(TAG, "File observer, change in $folderPath/$file")
