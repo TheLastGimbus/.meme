@@ -80,11 +80,11 @@ class PainKiller {
                 dirs.addAll(searchForPhotoDirs(ctx, file, includeHidden)) // recursion
             } else if (
                 file.isFile &&
+                !dirs.contains(path) &&
                 isFileImage(file) &&
                 (includeHidden || !File(file.parent, ".nomedia").exists())
             ) {
                 dirs.add(path)
-                break
             }
         }
 
