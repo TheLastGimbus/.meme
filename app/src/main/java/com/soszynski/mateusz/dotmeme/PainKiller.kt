@@ -55,7 +55,8 @@ class PainKiller {
         }
 
         return folder.listFiles { file ->
-            return@listFiles (file.isFile && isFileImage(file))
+            // Idk, is it 1024 or 1000, but let's just keep it 1024
+            return@listFiles file.isFile && file.canRead() && (file.length() / 1024) > 4 && isFileImage(file)
         }.toList()
     }
 

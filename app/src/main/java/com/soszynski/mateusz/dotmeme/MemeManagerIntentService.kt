@@ -87,7 +87,10 @@ class MemeManagerIntentService : IntentService("MemeManagerIntentService"),
         }
 
         var folderToScan: MemeFolder? = null
-        for (folder in realm.where(MemeFolder::class.java).findAll()) {
+        for (folder in realm.where(MemeFolder::class.java)
+            .equalTo(MemeFolder.IS_SCANNABLE, true)
+            .findAll()
+        ) {
             if (!MemeFolder.isFolderFullyScanned(folder)) {
                 folderToScan = folder
                 break
