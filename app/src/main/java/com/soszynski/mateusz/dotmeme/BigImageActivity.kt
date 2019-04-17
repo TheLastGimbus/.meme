@@ -50,6 +50,20 @@ class BigImageActivity : AppCompatActivity() {
     }
 
 
+    private fun logMeme(meme: Meme) {
+        val niceText = meme.rawText.replace("\n", "\n    ")
+        Log.i(
+            TAG, "Meme data: \n" +
+                    "Path: ${meme.filePath} \n" +
+                    "Ocr ver.: ${meme.ocrVersion} \n" +
+                    "Text: \n" +
+                    "    $niceText \n" +
+                    "Castrated text: \n" +
+                    "    ${StringUtils.stripAccents(niceText)}\n" +
+                    "Labels: ${meme.labels}"
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         realm = Realm.getDefaultInstance()
@@ -73,21 +87,14 @@ class BigImageActivity : AppCompatActivity() {
 
             override fun onPageSelected(p0: Int) {
                 val meme = realm.where(Meme::class.java).equalTo(Meme.FILE_PATH, memesPathsArray[p0]).findFirst()
-                val niceText = meme?.rawText?.replace("\n", "\n    ")
-                Log.i(
-                    TAG, "Meme data: \n" +
-                            "Path: ${meme?.filePath} \n" +
-                            "Ocr ver.: ${meme?.ocrVersion} \n" +
-                            "Text: \n" +
-                            "    $niceText \n" +
-                            "Castrated text: \n" +
-                            "    ${StringUtils.stripAccents(niceText)}\n" +
-                            "Labels: ${meme?.labels}"
-                )
+                meme?.let { logMeme(it) }
             }
 
         })
         viewPager.currentItem = intent.getIntExtra(START_IMAGE_INDEX, 0)
+
+        realm.where(Meme::class.java).equalTo(Meme.FILE_PATH, memesPathsArray[viewPager.currentItem])
+            .findFirst()?.let { logMeme(it) }
 
 
         button_share.setOnClickListener {
