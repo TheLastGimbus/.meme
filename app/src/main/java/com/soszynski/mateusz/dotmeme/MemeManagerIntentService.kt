@@ -21,6 +21,7 @@ class MemeManagerIntentService : IntentService("MemeManagerIntentService"),
     private val memebase = Memebase()
     private lateinit var prefs: SharedPreferences
     private var syncAllStartId: Int = 0
+    var isBusy = false
 
     override fun onCreate() {
         super.onCreate()
@@ -39,7 +40,9 @@ class MemeManagerIntentService : IntentService("MemeManagerIntentService"),
     override fun onHandleIntent(intent: Intent?) {
         when (intent?.action) {
             ACTION_SYNC_ALL -> {
-                handleActionSyncAll()
+                if (!isBusy) {
+                    handleActionSyncAll()
+                }
             }
             ACTION_PAUSE -> {
                 defaultSharedPreferences.edit()
@@ -65,63 +68,37 @@ class MemeManagerIntentService : IntentService("MemeManagerIntentService"),
     }
 
     private fun handleActionSyncAll() {
+        isBusy = true
+
         memebase.syncAllFolders(realm, this) {
             Log.i(TAG, "Global sync finished!")
 
-            recursiveScanAllFolders {
-                Log.i(TAG, "Scanning folders finished!")
+            if (prefs.getBoolean(Prefs.PREF_SCANNING_PAUSED, Prefs.PREF_SCANNING_PAUSED_default)) {
+                isBusy = false
+                stopForeground(true)
                 stopSelf(syncAllStartId)
-            }
-        }
-    }
-
-    private fun recursiveScanAllFolders(finished: () -> Unit) {
-        if (
-            prefs.getBoolean(Prefs.PREF_SCANNING_PAUSED, Prefs.PREF_SCANNING_PAUSED_default)
-            ||
-            memebase.scanningCanceled
-        ) {
-            stopForeground(true)
-            finished()
-            return
-        }
-
-        var folderToScan: MemeFolder? = null
-        for (folder in realm.where(MemeFolder::class.java)
-            .equalTo(MemeFolder.IS_SCANNABLE, true)
-            .findAll()
-        ) {
-            if (!MemeFolder.isFolderFullyScanned(folder)) {
-                folderToScan = folder
-                break
-            }
-        }
-        if (folderToScan == null) {
-            stopForeground(true)
-            finished()
-            return
-        }
-
-        val folderName = File(folderToScan.folderPath).name
-
-        memebase.scanFolder(
-            realm, folderToScan,
-            { max, progress ->
-                // progress
-                val notification = Notifications().getScanningForegroundNotification(
-                    this,
-                    folderName,
-                    progress,
-                    max
+            } else {
+                memebase.scanAllFolders(realm,
+                    { folder, max, progress ->
+                        // progress
+                        val notification = Notifications().getScanningForegroundNotification(
+                            this,
+                            File(folder.folderPath).name,
+                            progress,
+                            max
+                        )
+                        startForeground(FOREGROUND_NOTIFICATION_ID, notification)
+                    },
+                    {
+                        // finished
+                        Log.i(TAG, "Scanning folders finished!")
+                        isBusy = false
+                        stopForeground(true)
+                        stopSelf(syncAllStartId)
+                    }
                 )
-                Log.i(TAG, "Scanning folder $folderName, progress: $progress, max: $max")
-                startForeground(FOREGROUND_NOTIFICATION_ID, notification)
-            },
-            {
-                // finished
-                Log.i(TAG, "Finished scanning folder $folderName")
-                recursiveScanAllFolders(finished)
-            })
+            }
+        }
     }
 
     companion object {

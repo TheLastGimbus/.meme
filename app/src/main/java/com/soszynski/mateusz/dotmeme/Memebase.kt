@@ -378,6 +378,57 @@ class Memebase {
     }
 
     /**
+     * Scans all [MemeFolder]s with IS_SCANNABLE flag.
+     *
+     * @param realm [Realm]
+     * @param progress callback when progress was made. It contains folder which is scanned right now,
+     *                  total number of images in it and number of currently scanned images.
+     * @param finished callback when everything was finished.
+     */
+    fun scanAllFolders(
+        realm: Realm,
+        progress: (folder: MemeFolder, all: Int, scanned: Int) -> Unit,
+        finished: () -> Unit
+    ) {
+        if (scanningCanceled) {
+            finished()
+            return
+        }
+
+        var folderToScan: MemeFolder? = null
+        for (folder in realm.where(MemeFolder::class.java)
+            .equalTo(MemeFolder.IS_SCANNABLE, true)
+            .findAll()
+        ) {
+            if (!MemeFolder.isFolderFullyScanned(folder)) {
+                folderToScan = folder
+                break
+            }
+        }
+        if (folderToScan == null) {
+            finished()
+            return
+        }
+
+        val folderName = File(folderToScan.folderPath).name
+
+        scanFolder(
+            realm, folderToScan,
+            { max, scanned ->
+                // progress
+                Log.i(TAG, "Scanning folder $folderName, progress: $progress, max: $max")
+                progress(folderToScan, max, scanned)
+            },
+            {
+                // finished
+                Log.i(TAG, "Finished scanning folder $folderName")
+                scanAllFolders(realm, progress, finished)
+            }
+        )
+
+    }
+
+    /**
      * Search for memes.
      * This function is exception from "no long functions in Memebase class" rule.
      * It's just easier to migrate Realm and all folders to different thread when calling it.
