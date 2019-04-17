@@ -52,7 +52,7 @@ class Notifications {
 
         val builder = NotificationCompat.Builder(ctx, CHANNEL_ID_SYNCING)
             .setChannelId(CHANNEL_ID_SYNCING)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_launcher_icon)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setContentTitle("Scanning memes...")
             .setContentIntent(piMain)
