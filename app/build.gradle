@@ -48,12 +48,10 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
-    implementation 'com.google.firebase:firebase-core:16.0.7'
-    implementation 'com.google.firebase:firebase-ml-vision:19.0.2'
-    implementation 'com.google.firebase:firebase-perf:16.2.3'
+    implementation 'com.google.firebase:firebase-core:16.0.8'
+    implementation 'com.google.firebase:firebase-ml-vision:19.0.3'
+    implementation 'com.google.firebase:firebase-perf:16.2.5'
 
-    // This is like... the best fucking thing that could happen to Kotlin/Android.
-    // I don't know how did I leave without this.
     implementation 'org.jetbrains.anko:anko-common:0.9'
 
     implementation 'io.doorbell:android-sdk:0.3.0@aar'
@@ -61,7 +59,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
 
     implementation 'com.ablanco.imageprovider:imageprovider:0.1.0' // only temporary
-    implementation 'android.arch.navigation:navigation-fragment:1.0.0-beta01'
+    implementation 'android.arch.navigation:navigation-fragment:1.0.0'
     implementation 'org.apache.commons:commons-lang3:3.8.1'
 }
 

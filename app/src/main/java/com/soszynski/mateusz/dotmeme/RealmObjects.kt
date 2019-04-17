@@ -52,10 +52,10 @@ open class MemeFolder : RealmObject() {
     var memes: RealmList<Meme> = RealmList()
 
     companion object {
-        val FOLDER_PATH = "folderPath"
-        val IS_SCANNABLE = "isScannable"
-        val SD_CARD = "sdCard"
-        val MEMES = "memes"
+        const val FOLDER_PATH = "folderPath"
+        const val IS_SCANNABLE = "isScannable"
+        const val SD_CARD = "sdCard"
+        const val MEMES = "memes"
 
         /**
          * Companion function to check if all [Meme]s inside given [MemeFolder] are scanned.

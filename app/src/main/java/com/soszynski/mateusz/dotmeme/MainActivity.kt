@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private lateinit var prefChangeListener: SharedPreferences.OnSharedPreferenceChangeListener
 
-    var searchMode = false
+    private var searchMode = false
 
 
     private fun getMemeRoll(result: (roll: List<File>) -> Unit) {

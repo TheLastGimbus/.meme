@@ -94,7 +94,7 @@ class Notifications {
             ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val mChannel = NotificationChannel(id, name, importance)
-        if (description.isNullOrEmpty() == false) {
+        if (!description.isNullOrEmpty()) {
             mChannel.description = description
         }
         notificationManager.createNotificationChannel(mChannel)
