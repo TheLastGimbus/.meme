@@ -45,10 +45,6 @@
         </activity>
         <activity android:name=".SettingsActivity" />
 
-        <service
-            android:name=".MemeManagerIntentService"
-            android:exported="false" />
-
     </application>
 
 </manifest>

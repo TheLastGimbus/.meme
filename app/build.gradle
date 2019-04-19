@@ -29,6 +29,7 @@ android {
 
     packagingOptions {
         exclude 'META-INF/proguard/androidx-annotations.pro'
+        exclude 'META-INF/atomicfu.kotlin_module'
     }
 
     compileOptions {
@@ -48,6 +49,10 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
 
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.0"
+
+    implementation "androidx.work:work-runtime-ktx:2.0.1"
+
     implementation 'com.google.firebase:firebase-core:16.0.8'
     implementation 'com.google.firebase:firebase-ml-vision:19.0.3'
     implementation 'com.google.firebase:firebase-perf:16.2.5'
@@ -59,7 +64,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
 
     implementation 'com.ablanco.imageprovider:imageprovider:0.1.0' // only temporary
-    implementation 'androidx.navigation:navigation-fragment:2.1.0-alpha02'
+    implementation 'androidx.navigation:navigation-fragment:2.0.0'
     implementation 'org.apache.commons:commons-lang3:3.8.1'
 }
 

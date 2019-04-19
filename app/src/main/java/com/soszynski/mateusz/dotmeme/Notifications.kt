@@ -41,14 +41,6 @@ class Notifications {
     ): Notification {
         val piMain = PendingIntent
             .getActivity(ctx, 0, Intent(ctx, MainActivity::class.java), 0)
-        val piPause = PendingIntent.getService(
-            ctx,
-            0,
-            Intent(ctx, MemeManagerIntentService::class.java).apply {
-                action = MemeManagerIntentService.ACTION_PAUSE
-            },
-            0
-        )
 
         val builder = NotificationCompat.Builder(ctx, CHANNEL_ID_SYNCING)
             .setChannelId(CHANNEL_ID_SYNCING)
@@ -64,7 +56,6 @@ class Notifications {
                         .bigText("Folder: $folderName \nScanned: $progress, all: $max")
                 )
                 .setProgress(max, progress, false)
-                .addAction(0, "Pause", piPause)
         }
 
         return builder.build()

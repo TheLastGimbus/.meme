@@ -4,6 +4,8 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.ablanco.imageprovider.ImageProvider
 import com.ablanco.imageprovider.ImageSource
 import com.google.firebase.ml.vision.FirebaseVision
@@ -78,7 +80,8 @@ class DevStuffActivity : AppCompatActivity() {
         }
 
         button_sync.setOnClickListener {
-            MemeManagerIntentService.startActionSyncAll(this)
+            val request = OneTimeWorkRequestBuilder<FullSyncWorker>().build()
+            WorkManager.getInstance().enqueue(request)
         }
     }
 }
