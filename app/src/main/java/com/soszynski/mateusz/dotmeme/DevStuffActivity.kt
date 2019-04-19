@@ -3,7 +3,7 @@ package com.soszynski.mateusz.dotmeme
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.ablanco.imageprovider.ImageProvider
 import com.ablanco.imageprovider.ImageSource
 import com.google.firebase.ml.vision.FirebaseVision

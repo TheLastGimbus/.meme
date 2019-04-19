@@ -1,8 +1,6 @@
 package com.soszynski.mateusz.dotmeme
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +8,8 @@ import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.Switch
 import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import io.realm.Realm
 import kotlinx.android.synthetic.main.fragment_folders_settings.view.*
 import java.io.File

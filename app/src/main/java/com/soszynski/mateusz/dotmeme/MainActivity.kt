@@ -5,10 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.support.design.widget.NavigationView
-import android.support.v4.app.ActivityCompat
-import android.support.v4.view.GravityCompat
-import android.support.v7.app.AppCompatActivity
 import android.util.AttributeSet
 import android.view.MenuItem
 import android.view.View
@@ -18,6 +14,10 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.ProgressBar
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.view.GravityCompat
+import com.google.android.material.navigation.NavigationView
 import com.squareup.picasso.Picasso
 import io.doorbell.android.Doorbell
 import io.realm.Realm
