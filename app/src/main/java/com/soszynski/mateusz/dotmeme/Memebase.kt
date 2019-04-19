@@ -416,7 +416,7 @@ class Memebase {
             realm, folderToScan,
             { max, scanned ->
                 // progress
-                Log.i(TAG, "Scanning folder $folderName, progress: $progress, max: $max")
+                Log.i(TAG, "Scanning folder $folderName, progress: $scanned, max: $max")
                 progress(folderToScan, max, scanned)
             },
             {
