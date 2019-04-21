@@ -314,8 +314,7 @@ class Memebase {
                     MODIFY,
                     MOVED_FROM,
                     MOVED_TO,
-                    MOVE_SELF,
-                    ATTRIB
+                    MOVE_SELF
                 )
                 if (wantedEvents.contains(event)) {
                     Log.d(TAG, "File observer, change in $folderPath/$file")
