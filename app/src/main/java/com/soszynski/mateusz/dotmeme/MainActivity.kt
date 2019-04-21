@@ -17,6 +17,9 @@ import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.google.android.material.navigation.NavigationView
 import com.squareup.picasso.Picasso
 import io.doorbell.android.Doorbell
@@ -26,6 +29,7 @@ import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -216,6 +220,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             return@setOnEditorActionListener true
         }
+
+
+        val repRequest = PeriodicWorkRequestBuilder<FullSyncWorker>(
+            15,
+            TimeUnit.MINUTES
+        ).build()
+        WorkManager.getInstance().enqueueUniquePeriodicWork(
+            FullSyncWorker.UNIQUE_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            repRequest
+        )
     }
 
     override fun onBackPressed() {
