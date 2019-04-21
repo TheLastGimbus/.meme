@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.FileObserver
 import android.util.AttributeSet
 import android.view.MenuItem
 import android.view.View
@@ -40,6 +41,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var realm: Realm
 
     private lateinit var prefChangeListener: SharedPreferences.OnSharedPreferenceChangeListener
+    private var fileObservers = arrayListOf<FileObserver>()
 
     private var searchMode = false
 
@@ -64,6 +66,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             uiThread {
                 result(filesMutableList.toList())
             }
+        }
+    }
+
+    private fun updateVisibleMemeRoll(finished: () -> Unit = {}) {
+        getMemeRoll { memeRoll ->
+            gridView_meme_roll.adapter = ImageAdapter(memeRoll)
+            finished()
         }
     }
 
@@ -144,6 +153,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         realm = Realm.getDefaultInstance()
         val prefs = defaultSharedPreferences
+        val memebase = Memebase()
 
         Notifs.createChannels(this)
 
@@ -159,11 +169,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             gridView_meme_roll.smoothScrollToPositionFromTop(0, 0, 350)
         }
 
-        getMemeRoll { memeRoll ->
+        // get current index
+        progressBar_loading.visibility = ProgressBar.VISIBLE
+        updateVisibleMemeRoll {
             progressBar_loading.visibility = ProgressBar.GONE
-
-            gridView_meme_roll.adapter = ImageAdapter(memeRoll)
         }
+        // Quickly update index for sure. This is not visible if there was no change.
+        memebase.syncAllFolders(realm, this, false) {
+            updateVisibleMemeRoll()
+        }
+
+
         gridView_meme_roll.setOnScrollChangeListener { _, _, _, _, _ ->
             if (gridView_meme_roll.firstVisiblePosition > 15) {
                 fab_go_up.show()
@@ -197,13 +213,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         editText_search.setOnEditorActionListener { v, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 hideKeyboard()
-                searchMode = true
-                button_nav_bar.setImageResource(R.drawable.ic_arrow_back_white_24dp)
-                progressBar_loading.visibility = ProgressBar.VISIBLE
-                gridView_meme_roll.adapter = ImageAdapter(emptyList())
 
                 val query = editText_search.text.toString()
                 if (query.isNotBlank()) {
+                    searchMode = true
+                    button_nav_bar.setImageResource(R.drawable.ic_arrow_back_white_24dp)
+                    progressBar_loading.visibility = ProgressBar.VISIBLE
+                    gridView_meme_roll.adapter = ImageAdapter(emptyList())
+
 
                     val config = realm.configuration // Thread migration
                     doAsync {
@@ -231,6 +248,39 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             ExistingPeriodicWorkPolicy.KEEP,
             repRequest
         )
+
+        realm.executeTransactionAsync { asyncRealm ->
+            val folders = asyncRealm.where(MemeFolder::class.java)
+                .equalTo(MemeFolder.IS_SCANNABLE, true).findAll()
+            for (folder in folders) {
+                fileObservers.add(
+                    object : FileObserver(folder.folderPath) {
+                        override fun onEvent(event: Int, path: String?) {
+                            val wantedEvents = intArrayOf(
+                                CREATE,
+                                CLOSE_WRITE,
+                                DELETE,
+                                DELETE_SELF,
+                                MODIFY,
+                                MOVED_FROM,
+                                MOVED_TO,
+                                MOVE_SELF
+                            )
+                            if (wantedEvents.contains(event)) {
+                                runOnUiThread {
+                                    if (!memebase.isSyncing) {
+                                        memebase.syncAllFolders(realm, this@MainActivity, false) {
+                                            updateVisibleMemeRoll()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }.apply { startWatching() }
+                )
+            }
+        }
+
     }
 
     override fun onBackPressed() {
