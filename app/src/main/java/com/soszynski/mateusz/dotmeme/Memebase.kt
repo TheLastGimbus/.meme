@@ -230,8 +230,8 @@ class Memebase {
     fun syncAllFolders(
         realm: Realm,
         ctx: Context,
-        finished: (newFolders: List<MemeFolder>) -> Unit,
-        syncFoldersIndex: Boolean = true
+        syncFoldersIndex: Boolean = true,
+        finished: (newFolders: List<MemeFolder>) -> Unit
     ) {
         isSyncing = true
 
