@@ -8,8 +8,13 @@ import io.realm.Realm
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.runOnUiThread
 import java.io.File
+import kotlin.random.Random
 
 class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) : Worker(ctx, workerParams) {
+    companion object {
+        const val UNIQUE_WORK_NAME = "unique_work_name_full_sync"
+    }
+
     override fun doWork(): Result {
         var finished = false
 
