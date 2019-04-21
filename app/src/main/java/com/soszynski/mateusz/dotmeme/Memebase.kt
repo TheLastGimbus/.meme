@@ -227,13 +227,25 @@ class Memebase {
      * @param ctx [Context]
      * @param finished
      */
-    fun syncAllFolders(realm: Realm, ctx: Context, finished: (newFolders: List<MemeFolder>) -> Unit) {
+    fun syncAllFolders(
+        realm: Realm,
+        ctx: Context,
+        finished: (newFolders: List<MemeFolder>) -> Unit,
+        syncFoldersIndex: Boolean = true
+    ) {
         isSyncing = true
+
+        var newFolders = emptyList<MemeFolder>()
+
         doAsync {
-            val foldersList = PainKiller().getAllFoldersWithImages(ctx)
-                .map(File::getAbsolutePath)
+            if (syncFoldersIndex) {
+                val foldersList = PainKiller().getAllFoldersWithImages(ctx)
+                    .map(File::getAbsolutePath)
+                uiThread {
+                    newFolders = syncFoldersIndex(realm, foldersList)
+                }
+            }
             uiThread {
-                val newFolders = syncFoldersIndex(realm, foldersList)
                 val foldersToSync = realm.where(MemeFolder::class.java)
                     .equalTo(MemeFolder.IS_SCANNABLE, true).findAll()
                 syncAllFoldersRecursive(realm, foldersToSync) {
