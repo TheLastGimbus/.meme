@@ -1,6 +1,9 @@
 package com.soszynski.mateusz.dotmeme
 
 import android.content.Context
+import android.content.Intent
+import android.os.Build
+import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -19,6 +22,16 @@ class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) :
         var finished = false
 
         val prefs = ctx.defaultSharedPreferences
+
+
+        val notification = NotificationCompat.Builder(ctx, Notifs.CHANNEL_ID_SYNCING)
+            .setChannelId(Notifs.CHANNEL_ID_SYNCING)
+            .setSmallIcon(R.drawable.ic_launcher_icon)
+            .setColor(ctx.getColor(R.color.colorPrimary))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentTitle("Work manager working")
+            .build()
+        NotificationManagerCompat.from(ctx).notify(Random.nextInt(), notification)
 
         ctx.runOnUiThread {
             val realm = Realm.getDefaultInstance()
@@ -41,9 +54,24 @@ class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) :
                     }
                 }
 
+                // foreground service is running, so we don't need to scan
+                if (FullMemeSyncIntentService.isRunning(ctx)) {
+                    finished = true
+                    return@syncAllFolders
+                }
+
                 memebase.scanAllFolders(realm,
                     { memeFolder: MemeFolder, all: Int, progress: Int ->
                         // progress
+                        // we have a bigger job to do here, so we will let foreground service do this
+                        if (all - progress > 15) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                startForegroundService(Intent(ctx, FullMemeSyncIntentService::class.java))
+                            } else {
+                                startService(Intent(ctx, FullMemeSyncIntentService::class.java))
+                            }
+                            memebase.scanningCanceled = true
+                        }
                     },
                     {
                         // finished

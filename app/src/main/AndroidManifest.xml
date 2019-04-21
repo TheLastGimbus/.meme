@@ -16,6 +16,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <service
+            android:name=".FullMemeSyncIntentService"
+            android:exported="false" />
+
         <receiver
             android:name=".NewFolderFoundDecisionReceiver"
             android:enabled="true"

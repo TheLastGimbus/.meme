@@ -25,11 +25,6 @@ class Notifs {
         const val NOTIFICATION_ID_NEW_FOLDER = 2500
 
 
-        fun notifyNewFoldersFound(ctx: Context) {
-
-        }
-
-        // TODO: Change placeholders to fancy things
         /**
          * @param ctx [Context]
          * @param folderName name of folder that is currently being scanned.
@@ -54,13 +49,14 @@ class Notifs {
                 .setContentTitle("Scanning memes...")
                 .setContentIntent(piMain)
 
-            if (!folderName.isNullOrEmpty() && max != null && progress != null) {
-                builder
-                    .setStyle(
-                        NotificationCompat.BigTextStyle()
-                            .bigText("Folder: $folderName \nScanned: $progress, all: $max")
-                    )
-                    .setProgress(max, progress, false)
+            if (!folderName.isNullOrEmpty()) {
+                builder.setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText("Folder: $folderName \nScanned: $progress, all: $max")
+                )
+            }
+            if (max != null && progress != null) {
+                builder.setProgress(max, progress, false)
             }
 
             return builder.build()
