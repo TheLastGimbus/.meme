@@ -7,4 +7,10 @@
     <string name="settings">Ustawienia</string>
     <string name="search">Szukaj</string>
     <string name="share">Udostępnij</string>
+    <string name="notif_channel_meme_sync">Synchronizacja memów</string>
+    <string name="notif_channel_new_folder">Znaleziono nowy folder</string>
+    <string name="notif_title_new_folder">Znaleziono nowy folder</string>
+    <string name="notif_desc_new_folder">Czy chcesz synchronizować memy z folderu [folder_name]?</string>
+    <string name="yes">Tak</string>
+    <string name="no">Nie</string>
 </resources>

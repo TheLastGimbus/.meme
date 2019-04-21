@@ -16,6 +16,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <receiver
+            android:name=".NewFolderFoundDecisionReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
         <activity android:name=".DevStuffActivity" />
         <activity android:name=".BigImageActivity" />
 
@@ -44,7 +49,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".SettingsActivity" />
-
     </application>
 
 </manifest>

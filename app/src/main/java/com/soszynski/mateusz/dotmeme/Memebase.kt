@@ -58,7 +58,7 @@ class Memebase {
      */
     private fun addNewFolders(realm: Realm, devicePaths: List<String>): List<MemeFolder> {
         val newFound: MutableList<MemeFolder> = mutableListOf()
-        realm.executeTransactionAsync { realm ->
+        realm.executeTransaction { realm ->
             for (path in devicePaths) {
                 val count = realm.where(MemeFolder::class.java)
                     .equalTo(MemeFolder.FOLDER_PATH, path).findAll()
@@ -227,19 +227,19 @@ class Memebase {
      * @param ctx [Context]
      * @param finished
      */
-    fun syncAllFolders(realm: Realm, ctx: Context, finished: () -> Unit) {
+    fun syncAllFolders(realm: Realm, ctx: Context, finished: (newFolders: List<MemeFolder>) -> Unit) {
         isSyncing = true
         doAsync {
             val foldersList = PainKiller().getAllFoldersWithImages(ctx)
                 .map(File::getAbsolutePath)
             uiThread {
-                syncFoldersIndex(realm, foldersList)
+                val newFolders = syncFoldersIndex(realm, foldersList)
                 val foldersToSync = realm.where(MemeFolder::class.java)
                     .equalTo(MemeFolder.IS_SCANNABLE, true).findAll()
                 syncAllFoldersRecursive(realm, foldersToSync) {
                     // finished
                     isSyncing = false
-                    finished()
+                    finished(newFolders)
                 }
             }
 

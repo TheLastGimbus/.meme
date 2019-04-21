@@ -141,7 +141,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         realm = Realm.getDefaultInstance()
         val prefs = defaultSharedPreferences
 
-        Notifications().createChannels(this)
+        Notifs.createChannels(this)
 
         permission()
 
@@ -189,7 +189,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 drawer_layout.openDrawer(GravityCompat.START)
             }
         }
-
 
         editText_search.setOnEditorActionListener { v, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
