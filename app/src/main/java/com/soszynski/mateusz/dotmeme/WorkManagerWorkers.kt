@@ -5,6 +5,8 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import io.realm.Realm
@@ -16,6 +18,22 @@ import kotlin.random.Random
 class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) : Worker(ctx, workerParams) {
     companion object {
         const val UNIQUE_WORK_NAME = "unique_work_name_full_sync"
+
+        fun isScheduled(): Boolean {
+            try {
+                val workInfoList = WorkManager.getInstance()
+                    .getWorkInfosForUniqueWork(UNIQUE_WORK_NAME).get()
+                for (workInfo in workInfoList) {
+                    if (workInfo.state != WorkInfo.State.CANCELLED) {
+                        return true
+                    }
+                }
+                return false
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return false
+            }
+        }
     }
 
     override fun doWork(): Result {

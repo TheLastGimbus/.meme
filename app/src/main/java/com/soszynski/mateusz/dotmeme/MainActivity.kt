@@ -309,15 +309,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
 
-        val repRequest = PeriodicWorkRequestBuilder<FullSyncWorker>(
-            15,
-            TimeUnit.MINUTES
-        ).build()
-        WorkManager.getInstance().enqueueUniquePeriodicWork(
-            FullSyncWorker.UNIQUE_WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
-            repRequest
-        )
+        if (!FullSyncWorker.isScheduled()) {
+            val repRequest = PeriodicWorkRequestBuilder<FullSyncWorker>(
+                15,
+                TimeUnit.MINUTES
+            ).build()
+            WorkManager.getInstance().enqueueUniquePeriodicWork(
+                FullSyncWorker.UNIQUE_WORK_NAME,
+                ExistingPeriodicWorkPolicy.KEEP,
+                repRequest
+            )
+        }
     }
 
     override fun onBackPressed() {
