@@ -82,7 +82,7 @@ class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) :
                     { memeFolder: MemeFolder, all: Int, progress: Int ->
                         // progress
                         // we have a bigger job to do here, so we will let foreground service do this
-                        if (all - progress > 15) {
+                        if (all - progress > 10) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 startForegroundService(Intent(ctx, FullMemeSyncIntentService::class.java))
                             } else {
