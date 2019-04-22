@@ -24,7 +24,9 @@ import androidx.work.WorkManager
 import com.google.android.material.navigation.NavigationView
 import com.squareup.picasso.Picasso
 import io.doorbell.android.Doorbell
+import io.realm.ObjectChangeSet
 import io.realm.Realm
+import io.realm.RealmObjectChangeListener
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doAsync
@@ -33,15 +35,21 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
+    RealmObjectChangeListener<MemeFolder> {
     companion object {
         const val TAG = "MainActivity"
     }
 
-    private lateinit var realm: Realm
+    private val memebase = Memebase()
+    private var realm: Realm = Realm.getDefaultInstance()
+    private var memeFolders: List<MemeFolder> = realm.where(MemeFolder::class.java).findAll().toList()
 
     private lateinit var prefChangeListener: SharedPreferences.OnSharedPreferenceChangeListener
-    private var fileObservers = arrayListOf<FileObserver>()
+    private var fileObservers = mutableListOf<FileObserver>()
+    private var syncScheduled = false
+
+    private var lastMemeRoll = emptyList<File>()
 
     private var searchMode = false
 
@@ -49,30 +57,89 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun getMemeRoll(result: (roll: List<File>) -> Unit) {
         doAsync {
             val realmAsync = Realm.getDefaultInstance() // so we don't mess up between threads
-            val images = realmAsync
+            val filesList = realmAsync
                 .where(MemeFolder::class.java)
                 .equalTo(MemeFolder.IS_SCANNABLE, true)
                 .findAll()
                 .map { it.memes }
                 .flatten()
-
-            val filesMutableList = mutableListOf<File>()
-            for (meme in images) {
-                filesMutableList.add(File(meme.filePath))
-            }
-            filesMutableList.sortByDescending { it.lastModified() }
+                .map { File(it.filePath) }
+                .sortedByDescending { it.lastModified() }
 
             realmAsync.close()
             uiThread {
-                result(filesMutableList.toList())
+                result(filesList)
             }
         }
     }
 
     private fun updateVisibleMemeRoll(finished: () -> Unit = {}) {
+        updateFoldersList()
         getMemeRoll { memeRoll ->
-            gridView_meme_roll.adapter = ImageAdapter(memeRoll)
+            if (!searchMode && memeRoll != lastMemeRoll) {
+                lastMemeRoll = memeRoll
+                gridView_meme_roll.adapter = ImageAdapter(memeRoll)
+            }
             finished()
+        }
+    }
+
+    private fun syncAndUpdateRoll() {
+        if (!memebase.isSyncing) {
+            memebase.syncAllFolders(realm, this@MainActivity, false) {
+                if (syncScheduled) {
+                    syncScheduled = false
+                    syncAndUpdateRoll()
+                } else {
+                    updateVisibleMemeRoll()
+                }
+            }
+        } else {
+            syncScheduled = true
+        }
+    }
+
+    private fun updateFoldersList() {
+        val results = realm.where(MemeFolder::class.java).findAllAsync()
+        results.addChangeListener { t, changeSet ->
+            memeFolders = results.toList()
+            addRealmFoldersChangeListeners()
+            setFileObservers()
+        }
+    }
+
+    private fun addRealmFoldersChangeListeners() {
+        for (folder in memeFolders) {
+            folder.removeAllChangeListeners()
+            folder.addChangeListener(this)
+        }
+    }
+
+    private fun setFileObservers() {
+        fileObservers.forEach { it.stopWatching() }
+        fileObservers.clear()
+
+        val folders = memeFolders.filter { it.isScannable }
+        for (folder in folders) {
+            fileObservers.add(
+                object : FileObserver(folder.folderPath) {
+                    override fun onEvent(event: Int, path: String?) {
+                        val wantedEvents = intArrayOf(
+                            CREATE,
+                            CLOSE_WRITE,
+                            DELETE,
+                            DELETE_SELF,
+                            MODIFY,
+                            MOVED_FROM,
+                            MOVED_TO,
+                            MOVE_SELF
+                        )
+                        if (wantedEvents.contains(event)) {
+                            syncAndUpdateRoll()
+                        }
+                    }
+                }.apply { startWatching() }
+            )
         }
     }
 
@@ -145,6 +212,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         editText_search.clearFocus()
     }
 
+    override fun onChange(t: MemeFolder, changeSet: ObjectChangeSet?) {
+        if (changeSet != null && changeSet.isFieldChanged(MemeFolder.IS_SCANNABLE)) {
+            syncAndUpdateRoll()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -153,7 +226,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         realm = Realm.getDefaultInstance()
         val prefs = defaultSharedPreferences
-        val memebase = Memebase()
 
         Notifs.createChannels(this)
 
@@ -175,9 +247,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             progressBar_loading.visibility = ProgressBar.GONE
         }
         // Quickly update index for sure. This is not visible if there was no change.
-        memebase.syncAllFolders(realm, this, false) {
-            updateVisibleMemeRoll()
-        }
+        syncAndUpdateRoll()
 
 
         gridView_meme_roll.setOnScrollChangeListener { _, _, _, _, _ ->
@@ -248,39 +318,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             ExistingPeriodicWorkPolicy.KEEP,
             repRequest
         )
-
-        realm.executeTransactionAsync { asyncRealm ->
-            val folders = asyncRealm.where(MemeFolder::class.java)
-                .equalTo(MemeFolder.IS_SCANNABLE, true).findAll()
-            for (folder in folders) {
-                fileObservers.add(
-                    object : FileObserver(folder.folderPath) {
-                        override fun onEvent(event: Int, path: String?) {
-                            val wantedEvents = intArrayOf(
-                                CREATE,
-                                CLOSE_WRITE,
-                                DELETE,
-                                DELETE_SELF,
-                                MODIFY,
-                                MOVED_FROM,
-                                MOVED_TO,
-                                MOVE_SELF
-                            )
-                            if (wantedEvents.contains(event)) {
-                                runOnUiThread {
-                                    if (!memebase.isSyncing) {
-                                        memebase.syncAllFolders(realm, this@MainActivity, false) {
-                                            updateVisibleMemeRoll()
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }.apply { startWatching() }
-                )
-            }
-        }
-
     }
 
     override fun onBackPressed() {
@@ -290,11 +327,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             button_nav_bar.setImageResource(R.drawable.ic_dehaze_white_24dp)
             editText_search.text.clear()
             editText_search.clearFocus()
-            gridView_meme_roll.adapter = ImageAdapter(emptyList())
-            getMemeRoll { memeRoll ->
-                gridView_meme_roll.adapter = ImageAdapter(memeRoll)
-            }
             searchMode = false
+            updateVisibleMemeRoll()
         } else {
             super.onBackPressed()
         }
