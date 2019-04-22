@@ -338,14 +338,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_settings -> {
-
+                startActivity(Intent(this, SettingsActivity::class.java))
             }
             R.id.nav_feedback -> {
-                Doorbell(
+                val door = Doorbell(
                     this,
                     10050,
                     "Fpg9YDZGtEgYzsbCHLRgErNms46Em6XiJpl0NtscLzH246DrKRLKwurjSEdbaDLP"
-                ).show()  // please don't use my private key ;)
+                ) // please don't use my private key ;)
+                door.messageField.setHint(R.string.doorbell_field_hint_message)
+                door.emailField.setHint(R.string.doorbell_field_hint_email)
+                door.show()
             }
             R.id.nav_dev_stuff -> {
                 val intent = Intent(this, DevStuffActivity::class.java)

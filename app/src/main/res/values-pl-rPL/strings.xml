@@ -3,7 +3,7 @@
     <string name="app_name">.meme</string>
     <string name="navigation_drawer_open">Otwórz boczne menu</string>
     <string name="navigation_drawer_close">Zamknij boczne menu</string>
-    <string name="navigation_drawer_item_send_feedback">Przekaż opinie</string>
+    <string name="navigation_drawer_item_send_feedback">Przekaż wiadomość</string>
     <string name="settings">Ustawienia</string>
     <string name="search">Szukaj</string>
     <string name="share">Udostępnij</string>
@@ -13,4 +13,6 @@
     <string name="notif_desc_new_folder">Czy chcesz synchronizować memy z folderu [folder_name]?</string>
     <string name="yes">Tak</string>
     <string name="no">Nie</string>
+    <string name="doorbell_field_hint_message">Co cie trapi?</string>
+    <string name="doorbell_field_hint_email">Email (nie wymagany)</string>
 </resources>

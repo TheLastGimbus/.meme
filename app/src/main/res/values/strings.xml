@@ -12,4 +12,6 @@
     <string name="notif_desc_new_folder">Do you want to sync memes from [folder_name]?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="doorbell_field_hint_message">What\'s on your mind?</string>
+    <string name="doorbell_field_hint_email">Email (not required)</string>
 </resources>
