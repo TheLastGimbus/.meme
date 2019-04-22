@@ -327,8 +327,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             button_nav_bar.setImageResource(R.drawable.ic_dehaze_white_24dp)
             editText_search.text.clear()
             editText_search.clearFocus()
+            gridView_meme_roll.adapter = ImageAdapter(lastMemeRoll)
             searchMode = false
-            updateVisibleMemeRoll()
         } else {
             super.onBackPressed()
         }
