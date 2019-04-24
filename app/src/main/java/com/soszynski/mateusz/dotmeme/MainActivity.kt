@@ -89,14 +89,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    private fun syncAndUpdateRoll() {
+    private fun syncAndUpdateRoll(finished: () -> Unit = {}) {
         if (!memebase.isSyncing) {
             memebase.syncAllFolders(realm, this@MainActivity, false) {
                 if (syncScheduled) {
                     syncScheduled = false
-                    syncAndUpdateRoll()
+                    syncAndUpdateRoll(finished)
                 } else {
-                    updateVisibleMemeRoll()
+                    updateVisibleMemeRoll {
+                        finished()
+                    }
                 }
             }
         } else {
@@ -231,10 +233,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         realm = Realm.getDefaultInstance()
         val prefs = defaultSharedPreferences
-        if (true/*prefs.getBoolean(Prefs.Keys.FIRST_LAUNCH, true)*/) {
-            prefs.edit()
-                .putBoolean(Prefs.Keys.FIRST_LAUNCH, false)
-                .apply()
+        if (prefs.getBoolean(Prefs.Keys.FIRST_LAUNCH, true)) {
             startActivityForResult(Intent(this, IntroActivity::class.java), INTRO_ACTIVITY_REQUEST_CODE)
         } else {
             permission()
@@ -337,6 +336,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (requestCode == INTRO_ACTIVITY_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 FullMemeSyncService.start(this)
+                progressBar_loading.visibility = ProgressBar.VISIBLE
+                syncAndUpdateRoll {
+                    progressBar_loading.visibility = ProgressBar.GONE
+                }
             }
         }
 

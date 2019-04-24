@@ -8,6 +8,7 @@ import android.os.Handler
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.github.paolorotolo.appintro.AppIntro
+import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.toast
 
 
@@ -50,6 +51,9 @@ class IntroActivity : AppIntro() {
 
     override fun onDonePressed(currentFragment: Fragment?) {
         super.onDonePressed(currentFragment)
+        defaultSharedPreferences.edit()
+            .putBoolean(Prefs.Keys.FIRST_LAUNCH, false)
+            .apply()
         setResult(Activity.RESULT_OK, intent)
         finish()
     }
