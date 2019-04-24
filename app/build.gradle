@@ -63,7 +63,6 @@ dependencies {
 
     implementation 'com.squareup.picasso:picasso:2.71828'
 
-    implementation 'com.ablanco.imageprovider:imageprovider:0.1.0' // only temporary
     implementation 'androidx.navigation:navigation-fragment:2.0.0'
     implementation 'org.apache.commons:commons-lang3:3.8.1'
 

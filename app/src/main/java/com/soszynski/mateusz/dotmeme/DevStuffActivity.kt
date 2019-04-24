@@ -5,10 +5,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.ablanco.imageprovider.ImageProvider
-import com.ablanco.imageprovider.ImageSource
-import com.google.firebase.ml.vision.FirebaseVision
-import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_dev_stuff.*
 
@@ -37,6 +33,8 @@ class DevStuffActivity : AppCompatActivity() {
         button_scan.setOnClickListener {
             textView_text.text = "Wait..."
 
+            // TODO: Replace this with something else
+            /*
             ImageProvider(this).getImage(ImageSource.GALLERY) { bitmap ->
                 if (bitmap != null) {
                     imageView_meme.setImageBitmap(bitmap)
@@ -54,7 +52,7 @@ class DevStuffActivity : AppCompatActivity() {
                         }
                 }
 
-            }
+            }*/
         }
 
         button_settings.setOnClickListener {
