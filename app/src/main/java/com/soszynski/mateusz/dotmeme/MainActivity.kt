@@ -1,11 +1,14 @@
 package com.soszynski.mateusz.dotmeme
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.FileObserver
+import android.os.Handler
 import android.util.AttributeSet
 import android.view.MenuItem
 import android.view.View
@@ -30,6 +33,7 @@ import io.realm.RealmObjectChangeListener
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.toast
 import org.jetbrains.anko.uiThread
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -39,6 +43,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     RealmObjectChangeListener<MemeFolder> {
     companion object {
         const val TAG = "MainActivity"
+        const val INTRO_ACTIVITY_REQUEST_CODE = 15
     }
 
     private val memebase = Memebase()
@@ -226,10 +231,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         realm = Realm.getDefaultInstance()
         val prefs = defaultSharedPreferences
+        if (true/*prefs.getBoolean(Prefs.Keys.FIRST_LAUNCH, true)*/) {
+            prefs.edit()
+                .putBoolean(Prefs.Keys.FIRST_LAUNCH, false)
+                .apply()
+            startActivityForResult(Intent(this, IntroActivity::class.java), INTRO_ACTIVITY_REQUEST_CODE)
+        } else {
+            permission()
+        }
 
         Notifs.createChannels(this)
-
-        permission()
 
 
         // TODO: Search FAB works as search on keyboard when keyboard is shown
@@ -319,6 +330,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 ExistingPeriodicWorkPolicy.KEEP,
                 repRequest
             )
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == INTRO_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                FullMemeSyncService.start(this)
+            }
+        }
+
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (requestCode == 1) {
+            if (!(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                toast("App won't work without this :(")
+                Handler().postDelayed({
+                    permission()
+                }, 1000)
+            }
         }
     }
 

@@ -14,4 +14,7 @@
     <string name="no">No</string>
     <string name="doorbell_field_hint_message">What\'s on your mind?</string>
     <string name="doorbell_field_hint_email">Email (not required)</string>
+    <string name="intro_1_wait">Wait a second, I will search for memes on your phone...</string>
+    <string name="intro_1_done">Done! Now, select folders with your memes in the next page...</string>
+    <string name="intro_1_welcome">Welcome to .meme !</string>
 </resources>

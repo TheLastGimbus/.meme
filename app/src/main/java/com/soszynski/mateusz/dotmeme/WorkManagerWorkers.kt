@@ -1,8 +1,6 @@
 package com.soszynski.mateusz.dotmeme
 
 import android.content.Context
-import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.WorkInfo
@@ -73,7 +71,7 @@ class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) :
                 }
 
                 // foreground service is running, so we don't need to scan
-                if (FullMemeSyncIntentService.isRunning(ctx)) {
+                if (FullMemeSyncService.isRunning(ctx)) {
                     finished = true
                     return@syncAllFolders
                 }
@@ -83,11 +81,7 @@ class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) :
                         // progress
                         // we have a bigger job to do here, so we will let foreground service do this
                         if (all - progress > 10) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                startForegroundService(Intent(ctx, FullMemeSyncIntentService::class.java))
-                            } else {
-                                startService(Intent(ctx, FullMemeSyncIntentService::class.java))
-                            }
+                            FullMemeSyncService.start(this)
                             memebase.scanningCanceled = true
                         }
                     },

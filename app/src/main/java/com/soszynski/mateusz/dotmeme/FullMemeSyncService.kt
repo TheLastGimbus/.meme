@@ -5,6 +5,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationManagerCompat
 import io.realm.Realm
@@ -12,12 +13,12 @@ import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 
 
-class FullMemeSyncIntentService : Service() {
+class FullMemeSyncService : Service() {
     private val mBinder = LocalBinder()
 
     inner class LocalBinder : Binder() {
-        val service: FullMemeSyncIntentService
-            get() = this@FullMemeSyncIntentService
+        val service: FullMemeSyncService
+            get() = this@FullMemeSyncService
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -78,11 +79,19 @@ class FullMemeSyncIntentService : Service() {
     }
 
     companion object {
+        fun start(ctx: Context) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ctx.startForegroundService(Intent(ctx, FullMemeSyncService::class.java))
+            } else {
+                ctx.startService(Intent(ctx, FullMemeSyncService::class.java))
+            }
+        }
+
         fun isRunning(ctx: Context, needToBeForeground: Boolean = true): Boolean {
             val am = ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager? ?: return false
             val runningServices = am.getRunningServices(100)
             for (serviceInfo in runningServices) {
-                if (serviceInfo.service.className == FullMemeSyncIntentService::class.java.name) {
+                if (serviceInfo.service.className == FullMemeSyncService::class.java.name) {
                     return if (needToBeForeground) serviceInfo.foreground else true
                 }
             }

@@ -15,4 +15,7 @@
     <string name="no">Nie</string>
     <string name="doorbell_field_hint_message">Co cie trapi?</string>
     <string name="doorbell_field_hint_email">Email (nie wymagany)</string>
+    <string name="intro_1_wait">Poczekaj chwilke, poszukam memów na twoim telefonie...</string>
+    <string name="intro_1_done">Gotowe! Teraz, wybierz foldery z memami na następnej stronie...</string>
+    <string name="intro_1_welcome">Witaj w .meme !</string>
 </resources>
