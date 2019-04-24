@@ -233,6 +233,12 @@ class Memebase {
         syncFoldersIndex: Boolean = true,
         finished: (newFolders: List<MemeFolder>) -> Unit
     ) {
+        if (!PainKiller().hasStoragePermission(ctx)) {
+            Log.w(TAG, "Can't sync: no storage permission!")
+            finished(emptyList())
+            return
+        }
+
         isSyncing = true
 
         var newFolders = emptyList<MemeFolder>()
@@ -294,10 +300,17 @@ class Memebase {
      */
     fun scanFolder(
         realm: Realm,
+        ctx: Context,
         folder: MemeFolder,
         progress: (all: Int, scanned: Int) -> Unit,
         finished: () -> Unit
     ) {
+        if (!PainKiller().hasStoragePermission(ctx)) {
+            Log.w(TAG, "Can't scan: no storage permission!")
+            finished()
+            return
+        }
+
         isScanning = true
 
         val folderPath = folder.folderPath
@@ -379,7 +392,7 @@ class Memebase {
                     scanningFileObserver.stopWatching()
 
                     // This is theoretically recursion, but there is nothing big to be left in stack
-                    scanFolder(realm, folder, progress, finished)
+                    scanFolder(realm, ctx, folder, progress, finished)
                 }
         } else {
             isScanning = false
@@ -398,9 +411,16 @@ class Memebase {
      */
     fun scanAllFolders(
         realm: Realm,
+        ctx: Context,
         progress: (folder: MemeFolder, all: Int, scanned: Int) -> Unit,
         finished: () -> Unit
     ) {
+        if (!PainKiller().hasStoragePermission(ctx)) {
+            Log.w(TAG, "Can't scan: no storage permission!")
+            finished()
+            return
+        }
+
         if (scanningCanceled) {
             finished()
             return
@@ -424,7 +444,7 @@ class Memebase {
         val folderName = File(folderToScan.folderPath).name
 
         scanFolder(
-            realm, folderToScan,
+            realm, ctx, folderToScan,
             { max, scanned ->
                 // progress
                 Log.i(TAG, "Scanning folder $folderName, progress: $scanned, max: $max")
@@ -433,7 +453,7 @@ class Memebase {
             {
                 // finished
                 Log.i(TAG, "Finished scanning folder $folderName")
-                scanAllFolders(realm, progress, finished)
+                scanAllFolders(realm, ctx, progress, finished)
             }
         )
 

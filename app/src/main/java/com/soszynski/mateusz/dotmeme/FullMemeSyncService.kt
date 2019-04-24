@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import io.realm.Realm
 import org.jetbrains.anko.defaultSharedPreferences
@@ -27,6 +28,12 @@ class FullMemeSyncService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+
+        if (!PainKiller().hasStoragePermission(this)) {
+            Log.w(TAG, "Can't start foreground service: no storage permission!")
+            return
+        }
+
         startForeground(
             Notifs.NOTIFICATION_ID_SYNCING,
             Notifs.getScanningForegroundNotification(this, null, null, null)
@@ -56,7 +63,8 @@ class FullMemeSyncService : Service() {
                 }
             }
 
-            memebase.scanAllFolders(realm,
+            memebase.scanAllFolders(
+                realm, this,
                 { memeFolder: MemeFolder, all: Int, progress: Int ->
                     // progress
                     startForeground(
@@ -79,6 +87,8 @@ class FullMemeSyncService : Service() {
     }
 
     companion object {
+        const val TAG = "FullMemeSyncService"
+
         fun start(ctx: Context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 ctx.startForegroundService(Intent(ctx, FullMemeSyncService::class.java))

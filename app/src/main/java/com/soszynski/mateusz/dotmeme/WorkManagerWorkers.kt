@@ -1,7 +1,7 @@
 package com.soszynski.mateusz.dotmeme
 
 import android.content.Context
-import androidx.core.app.NotificationCompat
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -11,10 +11,10 @@ import io.realm.Realm
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.runOnUiThread
 import java.io.File
-import kotlin.random.Random
 
 class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) : Worker(ctx, workerParams) {
     companion object {
+        const val TAG = "FullSyncWorker"
         const val UNIQUE_WORK_NAME = "unique_work_name_full_sync"
 
         fun isScheduled(): Boolean {
@@ -35,19 +35,14 @@ class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) :
     }
 
     override fun doWork(): Result {
+        if (!PainKiller().hasStoragePermission(ctx)) {
+            Log.w(TAG, "Can't start full sync work: no storage permission!")
+            return Result.retry()
+        }
+
         var finished = false
 
         val prefs = ctx.defaultSharedPreferences
-
-
-        val notification = NotificationCompat.Builder(ctx, Notifs.CHANNEL_ID_SYNCING)
-            .setChannelId(Notifs.CHANNEL_ID_SYNCING)
-            .setSmallIcon(R.drawable.ic_launcher_icon)
-            .setColor(ctx.getColor(R.color.colorPrimary))
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentTitle("Work manager working")
-            .build()
-        NotificationManagerCompat.from(ctx).notify(Random.nextInt(), notification)
 
         ctx.runOnUiThread {
             val realm = Realm.getDefaultInstance()
@@ -76,7 +71,8 @@ class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) :
                     return@syncAllFolders
                 }
 
-                memebase.scanAllFolders(realm,
+                memebase.scanAllFolders(
+                    realm, ctx,
                     { memeFolder: MemeFolder, all: Int, progress: Int ->
                         // progress
                         // we have a bigger job to do here, so we will let foreground service do this
