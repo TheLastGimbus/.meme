@@ -17,4 +17,5 @@
     <string name="intro_1_wait">Wait a second, I will search for memes on your phone...</string>
     <string name="intro_1_done">Done! Now, select folders with your memes in the next page...</string>
     <string name="intro_1_welcome">Welcome to .meme !</string>
+    <string name="toast_permission_denied">App won\'t work without this :(</string>
 </resources>

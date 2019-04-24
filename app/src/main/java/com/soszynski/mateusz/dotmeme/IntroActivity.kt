@@ -40,7 +40,7 @@ class IntroActivity : AppIntro() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if (requestCode == code) {
             if (!(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                toast("App won't work without this :(")
+                toast(getString(R.string.toast_permission_denied))
                 Handler().postDelayed({
                     requestPermission()
                 }, 1000)
