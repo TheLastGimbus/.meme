@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.FileObserver
 import android.os.Handler
@@ -260,13 +261,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         syncAndUpdateRoll()
 
 
-        gridView_meme_roll.setOnScrollChangeListener { _, _, _, _, _ ->
-            if (gridView_meme_roll.firstVisiblePosition > 15) {
-                fab_go_up.show()
-            } else {
-                fab_go_up.hide()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            gridView_meme_roll.setOnScrollChangeListener { _, _, _, _, _ ->
+                if (gridView_meme_roll.firstVisiblePosition > 15) {
+                    fab_go_up.show()
+                } else {
+                    fab_go_up.hide()
+                }
             }
         }
+
         gridView_meme_roll.setOnItemClickListener { parent, view, position, id ->
             val intent = Intent(this, BigImageActivity::class.java).apply {
                 putExtra(
