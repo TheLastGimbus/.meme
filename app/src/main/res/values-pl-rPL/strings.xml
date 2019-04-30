@@ -19,4 +19,5 @@
     <string name="intro_1_done">Gotowe! Teraz, wybierz foldery z memami na następnej stronie...</string>
     <string name="intro_1_welcome">Witaj w .meme !</string>
     <string name="toast_permission_denied">Aplikacja bez tego nie zadziała :(</string>
+    <string name="navigation_drawer_about_app">O aplikacji</string>
 </resources>

@@ -386,6 +386,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 door.emailField.setHint(R.string.doorbell_field_hint_email)
                 door.show()
             }
+            R.id.nav_about -> {
+                startActivity(Intent(this, AboutActivity::class.java))
+            }
         }
 
         drawer_layout.closeDrawer(GravityCompat.START)

@@ -16,10 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <meta-data
-            android:name="google_analytics_adid_collection_enabled"
-            android:value="false" />
-
+        <activity android:name=".AboutActivity"></activity>
         <activity android:name=".IntroActivity" />
 
         <service
