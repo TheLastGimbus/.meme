@@ -243,7 +243,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Notifs.createChannels(this)
 
 
-        // TODO: Search FAB works as search on keyboard when keyboard is shown
         fab_search.setOnClickListener {
             showKeyboard()
         }
