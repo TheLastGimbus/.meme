@@ -16,8 +16,8 @@ android {
         applicationId "com.soszynski.mateusz.dotmeme"
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -68,6 +68,8 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.8.1'
 
     implementation 'com.github.AppIntro:AppIntro:5.1.0'
+
+    configurations { all*.exclude group: 'com.google.firebase', module: 'firebase-iid' }
 }
 
 apply plugin: 'com.google.gms.google-services'
