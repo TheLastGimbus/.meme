@@ -4,53 +4,73 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/black"
     android:fitsSystemWindows="true"
     tools:context=".BigImageActivity">
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-    </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
         android:id="@+id/frame_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black"
-        android:layout_marginTop="?attr/actionBarSize">
+        android:background="@color/black">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <!-- Top Nav Bar -->
+            <LinearLayout
+                android:id="@+id/nav_bar_top"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/black_transparent"
+                android:elevation="2dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:backgroundTint="@color/transparent"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:src="@drawable/ic_arrow_back_white_24dp" />
+
+            </LinearLayout>
+            <!-- Top Nav Bar -->
+
             <androidx.viewpager.widget.ViewPager
                 android:id="@+id/viewPager"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:elevation="0dp" />
 
-            <ImageButton
-                android:id="@+id/button_share"
-                android:layout_width="75dp"
-                android:layout_height="75dp"
-                android:layout_marginBottom="16dp"
+            <!-- Bottom Nav Bar -->
+            <LinearLayout
+                android:id="@+id/nav_bar_bottom"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
                 android:background="@color/black_transparent"
-                android:scaleType="centerInside"
-                android:src="@drawable/ic_share_white_24dp"
-                android:contentDescription="@string/share"
+                android:gravity="center"
+                android:orientation="horizontal"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent">
+
+                <ImageButton
+                    android:id="@+id/button_share"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
+                    android:background="@color/transparent"
+                    android:contentDescription="@string/share"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_share_white_24dp" />
+            </LinearLayout>
+            <!-- Bottom Nav Bar -->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </FrameLayout>

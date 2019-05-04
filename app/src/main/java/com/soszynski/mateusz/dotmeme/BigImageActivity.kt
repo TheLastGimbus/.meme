@@ -1,5 +1,7 @@
 package com.soszynski.mateusz.dotmeme
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -16,8 +18,10 @@ import kotlinx.android.synthetic.main.activity_big_image.*
 import org.apache.commons.lang3.StringUtils
 import java.io.File
 
+
 class BigImageActivity : AppCompatActivity() {
     lateinit var realm: Realm
+    private var fullscreen = false
 
     inner class ImageAdapter(val imagesPathsList: List<String>) : PagerAdapter() {
 
@@ -34,6 +38,11 @@ class BigImageActivity : AppCompatActivity() {
             imageView.layoutParams =
                 ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
+            // TODO: Replace this with something smarter
+            imageView.setOnClickListener {
+                setFullscreen(!fullscreen)
+            }
+
             Picasso.get()
                 .load(File(imagesPathsList[position]))
                 .error(R.drawable.ic_error_outline_gray_24dp)
@@ -49,6 +58,39 @@ class BigImageActivity : AppCompatActivity() {
         }
     }
 
+    private fun setFullscreen(setFull: Boolean) {
+        if (setFull) {
+            var goodCall = true
+            val endListener = object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    super.onAnimationEnd(animation)
+                    // because the listener keeps listening - even if we want to show it back
+                    if (goodCall) {
+                        nav_bar_top.visibility = View.GONE
+                        nav_bar_bottom.visibility = View.GONE
+                        goodCall = false
+                    }
+                }
+            }
+
+            nav_bar_top.animate()
+                .alpha(0.0f)
+                .setListener(endListener)
+
+            nav_bar_bottom.animate()
+                .alpha(0.0f)
+                .setListener(endListener)
+        } else {
+            nav_bar_top.visibility = View.VISIBLE
+            nav_bar_bottom.visibility = View.VISIBLE
+            nav_bar_top.animate()
+                .alpha(1.0f)
+            nav_bar_bottom.animate()
+                .alpha(1.0f)
+        }
+
+        fullscreen = setFull
+    }
 
     private fun logMeme(meme: Meme) {
         val niceText = meme.rawText.replace("\n", "\n    ")
@@ -68,13 +110,6 @@ class BigImageActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         realm = Realm.getDefaultInstance()
         setContentView(R.layout.activity_big_image)
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-
-
-        toolbar.setNavigationOnClickListener {
-            onBackPressed()
-        }
 
 
         val memesPathsArray = intent.getStringArrayExtra(IMAGES_SRC_PATH_ARRAY)
