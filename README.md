@@ -1,5 +1,7 @@
 # .meme
 
+<a href='https://play.google.com/store/apps/details?id=com.soszynski.mateusz.dotmeme&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' width=323 height=125 /></a>
+
 ## PL:
 #### .meme to aplikacja, która ma ci pomóc znaleźć odpowiedniego mema, w różnych sytuacjach, gdy będziesz go potrzebować.
 .meme skanuje wszystkie obrazy w zaznaczonych folderach pod kątem tekstu, dzięki czemu następnie można je szybko znaleźć.
@@ -10,8 +12,6 @@ Obecnie, aplikacja jest dostępna w wersji beta, ale dalsze poprawki i prace są
 .meme scans all of the images from selected folders by text, so you can find them later.
 It is currently available in beta, but further improvments are in plans.
 
-
-<a href='https://play.google.com/store/apps/details?id=com.soszynski.mateusz.dotmeme&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'/></a>
 
 License
 -------
