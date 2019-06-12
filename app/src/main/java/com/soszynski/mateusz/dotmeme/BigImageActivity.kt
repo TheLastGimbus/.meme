@@ -7,11 +7,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
+import com.github.chrisbanes.photoview.PhotoView
 import com.squareup.picasso.Picasso
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_big_image.*
@@ -34,7 +34,7 @@ class BigImageActivity : AppCompatActivity() {
         }
 
         override fun instantiateItem(container: ViewGroup, position: Int): Any {
-            val imageView = ImageView(this@BigImageActivity)
+            val imageView = PhotoView(this@BigImageActivity)
             imageView.layoutParams =
                 ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
