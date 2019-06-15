@@ -109,6 +109,9 @@ class BigImageActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         realm = Realm.getDefaultInstance()
         setContentView(R.layout.activity_big_image)
+        button_back.setOnClickListener {
+            onBackPressed()
+        }
 
 
         val memesPathsArray = intent.getStringArrayExtra(IMAGES_SRC_PATH_ARRAY)
