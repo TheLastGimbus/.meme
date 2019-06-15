@@ -38,8 +38,7 @@ class BigImageActivity : AppCompatActivity() {
             imageView.layoutParams =
                 ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
-            // TODO: Replace this with something smarter
-            imageView.setOnClickListener {
+            imageView.setOnPhotoTapListener { view, x, y ->
                 setFullscreen(!fullscreen)
             }
 
