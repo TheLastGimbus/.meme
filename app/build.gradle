@@ -37,6 +37,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -54,7 +57,7 @@ dependencies {
 
     implementation 'com.github.AppIntro:AppIntro:5.1.0'
 
-    implementation "androidx.work:work-runtime-ktx:2.0.1"
+    implementation "androidx.work:work-runtime-ktx:2.1.0"
 
     implementation 'com.google.firebase:firebase-core:16.0.8'
     implementation 'com.google.firebase:firebase-ml-vision:19.0.3'
@@ -64,7 +67,10 @@ dependencies {
 
     implementation 'io.doorbell:android-sdk:0.3.0@aar'
 
-    implementation 'org.apache.commons:commons-lang3:3.8.1'
+    // We won't need that probably anymore, but let's keep it here.
+    //implementation 'org.apache.commons:commons-lang3:3.8.1'
+
+    implementation 'me.xdrop:fuzzywuzzy:1.2.0'
 
 }
 

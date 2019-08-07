@@ -15,7 +15,6 @@ import com.github.chrisbanes.photoview.PhotoView
 import com.squareup.picasso.Picasso
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_big_image.*
-import org.apache.commons.lang3.StringUtils
 import java.io.File
 
 
@@ -36,7 +35,10 @@ class BigImageActivity : AppCompatActivity() {
         override fun instantiateItem(container: ViewGroup, position: Int): Any {
             val imageView = PhotoView(this@BigImageActivity)
             imageView.layoutParams =
-                ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
 
             imageView.setOnPhotoTapListener { view, x, y ->
                 setFullscreen(!fullscreen)
@@ -99,9 +101,7 @@ class BigImageActivity : AppCompatActivity() {
                     "Ocr ver.: ${meme.ocrVersion} \n" +
                     "Text: \n" +
                     "    $niceText \n" +
-                    "Castrated text: \n" +
-                    "    ${StringUtils.stripAccents(niceText)}\n" +
-                    "Labels: ${meme.labels}"
+                    "Labels: ${meme.labels}\n"
         )
     }
 
@@ -123,14 +123,17 @@ class BigImageActivity : AppCompatActivity() {
             override fun onPageScrolled(p0: Int, p1: Float, p2: Int) {}
 
             override fun onPageSelected(p0: Int) {
-                val meme = realm.where(Meme::class.java).equalTo(Meme.FILE_PATH, memesPathsArray[p0]).findFirst()
+                val meme =
+                    realm.where(Meme::class.java).equalTo(Meme.FILE_PATH, memesPathsArray[p0])
+                        .findFirst()
                 meme?.let { logMeme(it) }
             }
 
         })
         viewPager.currentItem = intent.getIntExtra(START_IMAGE_INDEX, 0)
 
-        realm.where(Meme::class.java).equalTo(Meme.FILE_PATH, memesPathsArray[viewPager.currentItem])
+        realm.where(Meme::class.java)
+            .equalTo(Meme.FILE_PATH, memesPathsArray[viewPager.currentItem])
             .findFirst()?.let { logMeme(it) }
 
 
