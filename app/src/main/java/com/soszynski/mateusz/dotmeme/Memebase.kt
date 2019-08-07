@@ -8,7 +8,7 @@ import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.perf.FirebasePerformance
 import io.realm.Realm
-import org.apache.commons.lang3.StringUtils
+import me.xdrop.fuzzywuzzy.FuzzySearch
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.io.File
@@ -88,7 +88,10 @@ class Memebase {
                 realm.where(MemeFolder::class.java)
                     .not().`in`(MemeFolder.FOLDER_PATH, devicePaths.toTypedArray()).findAll()
             if (result.count() > 0) {
-                Log.i(TAG, "Deleting folders from database, because they were not found on device: \n$result")
+                Log.i(
+                    TAG,
+                    "Deleting folders from database, because they were not found on device: \n$result"
+                )
                 result.deleteAllFromRealm()
             }
         }
@@ -158,7 +161,11 @@ class Memebase {
 
                 for (image in filesList) {
                     // If Meme with certain path doesn't exist yet
-                    if (folder.memes.where().equalTo(Meme.FILE_PATH, image.absolutePath).findAll().count() == 0) {
+                    if (folder.memes.where().equalTo(
+                            Meme.FILE_PATH,
+                            image.absolutePath
+                        ).findAll().count() == 0
+                    ) {
                         val meme = Meme()
                         meme.filePath = image.absolutePath
                         folder.memes.add(meme)
@@ -204,7 +211,8 @@ class Memebase {
 
                 val result =
                     folder.memes.where()
-                        .not().`in`(Meme.FILE_PATH, filesList.map(File::getAbsolutePath).toTypedArray())
+                        .not()
+                        .`in`(Meme.FILE_PATH, filesList.map(File::getAbsolutePath).toTypedArray())
                         .findAll()
                 result.deleteAllFromRealm()
             },
@@ -370,7 +378,10 @@ class Memebase {
                 }
                 .addOnFailureListener { e ->
                     e.printStackTrace()
-                    syncFolder(realm, folder) {} // Probably something wrong with current index if error occurred
+                    syncFolder(
+                        realm,
+                        folder
+                    ) {} // Probably something wrong with current index if error occurred
                 }
                 .continueWith {
                     trace.stop()
@@ -383,7 +394,8 @@ class Memebase {
                     }
 
                     val all = folder.memes.count()
-                    val scanned = folder.memes.where().equalTo(Meme.IS_SCANNED, true).findAll().count()
+                    val scanned =
+                        folder.memes.where().equalTo(Meme.IS_SCANNED, true).findAll().count()
                     progress(all, scanned)
 
                     if (changeInFolder) {
@@ -482,18 +494,12 @@ class Memebase {
 
         Log.i(TAG, "Begin of search, query: $query")
 
-        val keywords = StringUtils.stripAccents(query).split(" ".toRegex()).dropLastWhile { it.isEmpty() }
         for (folder in folders) {
             for (meme in folder.memes) {
-                var pair = Pair(0, meme)
-                val strippedText = StringUtils.stripAccents(meme.rawText)
-                for (keyword in keywords) {
-                    if (strippedText.contains(keyword, true)) {
-                        pair = pair.copy(first = pair.first + 1)
-                    }
-                }
+                val ratio = FuzzySearch.weightedRatio(query, meme.rawText)
+                val pair = Pair(ratio, meme)
 
-                if (pair.first > 0) {
+                if (pair.first > 30) {
                     memeList.add(pair)
                 }
             }
