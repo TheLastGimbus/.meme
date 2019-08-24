@@ -67,10 +67,10 @@ dependencies {
 
     implementation 'io.doorbell:android-sdk:0.3.0@aar'
 
-    // We won't need that probably anymore, but let's keep it here.
-    //implementation 'org.apache.commons:commons-lang3:3.8.1'
+    implementation 'org.apache.commons:commons-lang3:3.8.1'
 
-    implementation 'me.xdrop:fuzzywuzzy:1.2.0'
+    // We won't need that probably anymore, but let's keep it here.
+    // implementation 'me.xdrop:fuzzywuzzy:1.2.0'
 
 }
 
