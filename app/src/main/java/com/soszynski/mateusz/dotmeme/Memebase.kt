@@ -8,7 +8,7 @@ import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.perf.FirebasePerformance
 import io.realm.Realm
-import me.xdrop.fuzzywuzzy.FuzzySearch
+import org.apache.commons.lang3.StringUtils
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.io.File
@@ -494,12 +494,19 @@ class Memebase {
 
         Log.i(TAG, "Begin of search, query: $query")
 
+        val keywords =
+            StringUtils.stripAccents(query).split(" ".toRegex()).dropLastWhile { it.isEmpty() }
         for (folder in folders) {
             for (meme in folder.memes) {
-                val ratio = FuzzySearch.weightedRatio(query, meme.rawText)
-                val pair = Pair(ratio, meme)
+                var pair = Pair(0, meme)
+                val strippedText = StringUtils.stripAccents(meme.rawText)
+                for (keyword in keywords) {
+                    if (strippedText.contains(keyword, true)) {
+                        pair = pair.copy(first = pair.first + 1)
+                    }
+                }
 
-                if (pair.first > 30) {
+                if (pair.first > 0) {
                     memeList.add(pair)
                 }
             }
