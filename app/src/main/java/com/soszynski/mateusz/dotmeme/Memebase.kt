@@ -355,10 +355,15 @@ class Memebase {
             val meme = notScannedMemes.first()!!
             val bitmap = BitmapFactory.decodeFile(meme.filePath)
 
-            trace.putMetric("bitmap_size_bytes", bitmap.byteCount.toLong())
-            trace.putMetric("bitmap_size_height", bitmap.height.toLong())
-            trace.putMetric("bitmap_size_width", bitmap.width.toLong())
-            trace.putMetric("bitmap_width_to_height_ratio", (bitmap.width / bitmap.height).toLong())
+            // Don't even ask me why this needs to be in 'try'
+            try {
+                trace.putMetric("bitmap_size_bytes", bitmap.byteCount.toLong())
+                trace.putMetric("bitmap_size_height", bitmap.height.toLong())
+                trace.putMetric("bitmap_size_width", bitmap.width.toLong())
+                trace.putMetric("bitmap_size_all", (bitmap.height * bitmap.width).toLong())
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
 
             val fireImage = FirebaseVisionImage.fromBitmap(bitmap)
             ocr.processImage(fireImage)
