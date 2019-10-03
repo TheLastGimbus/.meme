@@ -101,6 +101,8 @@ class FullMemeSyncService : Service() {
         const val TAG = "FullMemeSyncService"
 
         fun start(ctx: Context) {
+            if (isRunning(ctx)) return
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 ctx.startForegroundService(Intent(ctx, FullMemeSyncService::class.java))
             } else {
