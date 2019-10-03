@@ -92,6 +92,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun syncAndUpdateRoll(finished: () -> Unit = {}) {
+        if (FullMemeSyncService.isRunning(this)) {
+            updateVisibleMemeRoll {
+                finished()
+            }
+            return
+        }
+
         if (!memebase.isSyncing) {
             doAsync {
                 val realm = Realm.getDefaultInstance()
@@ -272,8 +279,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         updateVisibleMemeRoll {
             progressBar_loading.visibility = ProgressBar.GONE
         }
+
         // Quickly update index for sure. This is not visible if there was no change.
-        syncAndUpdateRoll()
+        syncAndUpdateRoll {
+            // And after this quick refresh, start foreground service
+            // to get all new memes scanned quickly
+            FullMemeSyncService.start(this)
+        }
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
