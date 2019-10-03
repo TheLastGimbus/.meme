@@ -49,7 +49,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private val memebase = Memebase()
     private var realm: Realm = Realm.getDefaultInstance()
-    private var memeFolders: List<MemeFolder> = realm.where(MemeFolder::class.java).findAll().toList()
+    private var memeFolders: List<MemeFolder> =
+        realm.where(MemeFolder::class.java).findAll().toList()
 
     private lateinit var prefChangeListener: SharedPreferences.OnSharedPreferenceChangeListener
     private var fileObservers = mutableListOf<FileObserver>()
@@ -157,7 +158,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-        constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle)
+        constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(
+            context,
+            attrs,
+            defStyle
+        )
 
         override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -175,7 +180,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (convertView == null) {
                 imageView = SquareImageView(this@MainActivity)
                 imageView.layoutParams =
-                    ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                    ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
                 imageView.scaleType = ImageView.ScaleType.CENTER_CROP
             } else {
                 imageView = convertView as SquareImageView
@@ -235,7 +243,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         realm = Realm.getDefaultInstance()
         val prefs = defaultSharedPreferences
         if (prefs.getBoolean(Prefs.Keys.FIRST_LAUNCH, true)) {
-            startActivityForResult(Intent(this, IntroActivity::class.java), INTRO_ACTIVITY_REQUEST_CODE)
+            startActivityForResult(
+                Intent(this, IntroActivity::class.java),
+                INTRO_ACTIVITY_REQUEST_CODE
+            )
         } else {
             permission()
         }
@@ -348,7 +359,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         if (requestCode == 1) {
             if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_DENIED)) {
                 toast("App won't work without this :(")
