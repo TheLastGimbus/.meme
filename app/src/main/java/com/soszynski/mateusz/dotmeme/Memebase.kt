@@ -223,8 +223,6 @@ class Memebase {
                         )
                         .findAll()
 
-                Log.i(TAG, "RESULT: ${System.currentTimeMillis() - millis}")
-
                 result.deleteAllFromRealm()
 
                 // success
