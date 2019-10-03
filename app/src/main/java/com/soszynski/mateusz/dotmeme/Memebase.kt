@@ -172,6 +172,7 @@ class Memebase {
                         newMemes.add(meme)
                     }
                 }
+                Log.d(TAG, "LOL")
             },
             {
                 // success
@@ -203,29 +204,35 @@ class Memebase {
         // We need to do this, because
         // "Realm objects can only be accessed on the thread they were created"
         val folderPath = folder.folderPath
-        realm.executeTransactionAsync(
-            { realm ->
+        val config = realm.configuration
+        doAsync {
+            val asyncRealm = Realm.getInstance(config) // TODO: this should not be used
+
+            asyncRealm.executeTransaction { realm ->
                 // Yeah, kinda boilerplate, but whatever...
                 val folder = realm.where(MemeFolder::class.java)
                     .equalTo(MemeFolder.FOLDER_PATH, folderPath).findFirst()!!
 
+                val millis = System.currentTimeMillis()
                 val result =
                     folder.memes.where()
                         .not()
-                        .`in`(Meme.FILE_PATH, filesList.map(File::getAbsolutePath).toTypedArray())
+                        .`in`(
+                            Meme.FILE_PATH,
+                            filesList.map(File::getAbsolutePath).toTypedArray()
+                        )
                         .findAll()
+
+                Log.i(TAG, "RESULT: ${System.currentTimeMillis() - millis}")
+
                 result.deleteAllFromRealm()
-            },
-            {
+
                 // success
-                finished()
-            },
-            { e: Throwable ->
-                // error
-                e.printStackTrace()
-                finished()
+                uiThread {
+                    finished()
+                }
             }
-        )
+        }
     }
 
     /**
