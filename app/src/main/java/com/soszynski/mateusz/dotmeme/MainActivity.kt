@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.FileObserver
 import android.os.Handler
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -58,6 +59,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private var lastMemeRoll = emptyList<File>()
 
+    private var updateVisibleMemeRollRunning = false
+    private var updateVisibleMemeRollScheduled = false
+
     private var searchMode = false
 
 
@@ -81,13 +85,27 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun updateVisibleMemeRoll(finished: () -> Unit = {}) {
+        if (updateVisibleMemeRollRunning) {
+            updateVisibleMemeRollScheduled = true
+            return
+        }
+        Log.i(TAG, "Actually running update")
+        updateVisibleMemeRollRunning = true
+
         updateFoldersList()
         getMemeRoll { memeRoll ->
             if (!searchMode && memeRoll != lastMemeRoll) {
                 lastMemeRoll = memeRoll
                 gridView_meme_roll.adapter = ImageAdapter(memeRoll)
             }
-            finished()
+            updateVisibleMemeRollRunning = false
+
+            if (updateVisibleMemeRollScheduled) {
+                updateVisibleMemeRollScheduled = false
+                updateVisibleMemeRoll(finished)
+            } else {
+                finished()
+            }
         }
     }
 
