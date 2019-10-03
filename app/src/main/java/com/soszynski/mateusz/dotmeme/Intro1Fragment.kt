@@ -16,22 +16,25 @@ import org.jetbrains.anko.uiThread
 class Intro1Fragment : Fragment() {
 
     private fun doSync(ctx: Context) {
-        val realm = Realm.getDefaultInstance()
-        val prefs = ctx.defaultSharedPreferences
+        doAsync {
+            val realm = Realm.getDefaultInstance()
+            val prefs = ctx.defaultSharedPreferences
 
-        // Mute notifications in the first scan
-        prefs.edit()
-            .putBoolean(Prefs.Keys.SHOW_NEW_FOLDER_NOTIFICATION, false)
-            .apply()
+            // Mute notifications in the first scan
+            prefs.edit()
+                .putBoolean(Prefs.Keys.SHOW_NEW_FOLDER_NOTIFICATION, false)
+                .apply()
 
-        Memebase().syncAllFolders(realm, ctx) {
+            Memebase().syncAllFolders(realm, ctx)
             prefs.edit()
                 .putBoolean(Prefs.Keys.SHOW_NEW_FOLDER_NOTIFICATION, true)
                 .apply()
 
-            progressBar.visibility = View.INVISIBLE
-            imageView_check.visibility = View.VISIBLE
-            textView_done.visibility = View.VISIBLE
+            uiThread {
+                progressBar.visibility = View.INVISIBLE
+                imageView_check.visibility = View.VISIBLE
+                textView_done.visibility = View.VISIBLE
+            }
 
             realm.close()
         }

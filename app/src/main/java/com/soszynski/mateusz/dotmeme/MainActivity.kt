@@ -93,15 +93,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun syncAndUpdateRoll(finished: () -> Unit = {}) {
         if (!memebase.isSyncing) {
-            memebase.syncAllFolders(realm, this@MainActivity, false) {
-                if (syncScheduled) {
-                    syncScheduled = false
-                    syncAndUpdateRoll(finished)
-                } else {
-                    updateVisibleMemeRoll {
-                        finished()
+            doAsync {
+                val realm = Realm.getDefaultInstance()
+                memebase.syncAllFolders(realm, this@MainActivity, false)
+                uiThread {
+                    if (syncScheduled) {
+                        syncScheduled = false
+                        syncAndUpdateRoll(finished)
+                    } else {
+                        updateVisibleMemeRoll {
+                            finished()
+                        }
                     }
                 }
+
             }
         } else {
             syncScheduled = true
@@ -347,6 +352,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == INTRO_ACTIVITY_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 FullMemeSyncService.start(this)

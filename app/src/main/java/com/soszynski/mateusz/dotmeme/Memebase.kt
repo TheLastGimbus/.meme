@@ -18,7 +18,8 @@ import java.io.File
  * This class contains almost all things related to database of memes.
  * If you want to do any work with database - do it here.
  *
- * All functions don't take long enough to stop uiThread. If they take long, they use their own doAsync and callbacks.
+ * Some functions take long, and you need to wrap them in doAsync, some (like scanAllFolders handle
+ * it themselves. Read their doc to find out.
  */
 
 class Memebase {
@@ -50,6 +51,7 @@ class Memebase {
 
     /**
      * Discover new folders and add them to database.
+     * You need to handle async yourself.
      *
      * @param realm
      * @param devicePaths list of paths on device that contain photos.
@@ -78,6 +80,7 @@ class Memebase {
 
     /**
      * Delete folders that are still in database, but where deleted on device.
+     * You need to handle async yourself.
      *
      * @param realm
      * @param devicePaths list of paths on device that contain photos.
@@ -100,141 +103,104 @@ class Memebase {
     /**
      *  This only updates index in database. Does't scan any image
      *
+     *  This function takes long.
+     *  You need to handle async yourself.
+     *
      *  @param realm
      *  @param folder takes [MemeFolder] to sync [Meme]s inside it.
-     *  @param finished callback with new [Meme]s that were added to database index.
+     *  @return new [Meme]s that were added to database index.
      */
     private fun syncFolder(
         realm: Realm,
-        folder: MemeFolder,
-        finished: (newMemes: List<Meme>) -> Unit
-    ) {
+        folder: MemeFolder
+    ): List<Meme> {
         val trace = FirebasePerformance.getInstance().newTrace("memebase_sync_folder")
         trace.start()
-        val folderPath = File(folder.folderPath) // Realms can't go between threads :/
-        doAsync {
-            val imagesInFolderList = PainKiller().getAllImagesInFolder(folderPath)
-            uiThread {
-                deleteNotExistingMemesFromFolder(realm, folder, imagesInFolderList) {
-                    // when finished
-                    addNewMemesToFolder(realm, folder, imagesInFolderList) { newMemes ->
-                        // finished
-                        trace.putMetric("folder_images_count", folder.memes.count().toLong())
-                        trace.putMetric("folder_new_memes", newMemes.count().toLong())
-                        trace.stop()
 
-                        finished(newMemes)
-                    }
-                }
-            }
-        }
+        val imagesInFolderList = PainKiller().getAllImagesInFolder(File(folder.folderPath))
+
+        deleteNotExistingMemesFromFolder(realm, folder, imagesInFolderList)
+        val newMemes = addNewMemesToFolder(realm, folder, imagesInFolderList)
+
+        trace.putMetric("folder_images_count", folder.memes.count().toLong())
+        trace.putMetric("folder_new_memes", newMemes.count().toLong())
+        trace.stop()
+
+        return newMemes
     }
 
     /**
      * Adds new [Meme]s found on device to given [MemeFolder]
      *
+     * This function takes long.
+     * You need to handle async yourself.
+     *
      * @param realm
      * @param folder [MemeFolder] where new memes will be added.
      * @param filesList list of image files inside [folder]. It is separate for better optimization,
      *        since getting list of 5000 images from folder can take some time.
-     * @param finished callback when finished with new [Meme]s that were added to database index.
+     * @return new [Meme]s that were added to database index.
      */
     private fun addNewMemesToFolder(
         realm: Realm,
         folder: MemeFolder,
-        filesList: List<File>, // for better optimization
-        finished: (newMemes: List<Meme>) -> Unit
-    ) {
+        filesList: List<File> // for better optimization
+    ): List<Meme> {
         val newMemes = mutableListOf<Meme>()
 
-        // We need to do this, because
-        // "Realm objects can only be accessed on the thread they were created"
-        val folderPath = folder.folderPath
-
-        realm.executeTransactionAsync(
-            { realm ->
-                // transaction
-
-                // Yeah, kinda boilerplate, but whatever...
-                val folder = realm.where(MemeFolder::class.java)
-                    .equalTo(MemeFolder.FOLDER_PATH, folderPath).findFirst()!!
-
-                for (image in filesList) {
-                    // If Meme with certain path doesn't exist yet
-                    if (folder.memes.where().equalTo(
-                            Meme.FILE_PATH,
-                            image.absolutePath
-                        ).findAll().count() == 0
-                    ) {
-                        val meme = Meme()
-                        meme.filePath = image.absolutePath
-                        folder.memes.add(meme)
-                        newMemes.add(meme)
-                    }
+        realm.executeTransaction { realm ->
+            for (image in filesList) {
+                // If Meme with certain path doesn't exist yet
+                if (folder.memes.where().equalTo(
+                        Meme.FILE_PATH,
+                        image.absolutePath
+                    ).findAll().count() == 0
+                ) {
+                    val meme = Meme()
+                    meme.filePath = image.absolutePath
+                    folder.memes.add(meme)
+                    newMemes.add(meme)
                 }
-                Log.d(TAG, "LOL")
-            },
-            {
-                // success
-                finished(newMemes)
-            },
-            { e: Throwable ->
-                // error
-                e.printStackTrace()
-                finished(newMemes) // but we still need to make callback
             }
-        )
+        }
+        return newMemes
     }
 
     /**
      * Deletes [Meme]s from database that weren't found on device.
      *
+     * You need to handle async yourself.
+     *
      * @param realm
      * @param folder [MemeFolder] where memes will be deleted.
      * @param filesList list of image files inside [folder]. It is separate for better optimization,
      *        since getting list of 5000 images from folder can take some time.
-     * @param finished callback when finished.
      */
     private fun deleteNotExistingMemesFromFolder(
         realm: Realm,
         folder: MemeFolder,
-        filesList: List<File>, // for better optimization
-        finished: () -> Unit
+        filesList: List<File> // for better optimization
     ) {
-        // We need to do this, because
-        // "Realm objects can only be accessed on the thread they were created"
-        val folderPath = folder.folderPath
-        val config = realm.configuration
-        doAsync {
-            val asyncRealm = Realm.getInstance(config) // TODO: this should not be used
 
-            asyncRealm.executeTransaction { realm ->
-                // Yeah, kinda boilerplate, but whatever...
-                val folder = realm.where(MemeFolder::class.java)
-                    .equalTo(MemeFolder.FOLDER_PATH, folderPath).findFirst()!!
+        realm.executeTransaction { realm ->
+            val result =
+                folder.memes.where()
+                    .not()
+                    .`in`(
+                        Meme.FILE_PATH,
+                        filesList.map(File::getAbsolutePath).toTypedArray()
+                    )
+                    .findAll()
 
-                val millis = System.currentTimeMillis()
-                val result =
-                    folder.memes.where()
-                        .not()
-                        .`in`(
-                            Meme.FILE_PATH,
-                            filesList.map(File::getAbsolutePath).toTypedArray()
-                        )
-                        .findAll()
-
-                result.deleteAllFromRealm()
-
-                // success
-                uiThread {
-                    finished()
-                }
-            }
+            result.deleteAllFromRealm()
         }
     }
 
     /**
      * Synchronizes whole index. All [MemeFolder]s and all [Meme]s inside them.
+     *
+     * This function takes long.
+     * You need to handle async yourself.
      *
      * @param realm [Realm]
      * @param ctx [Context]
@@ -243,67 +209,58 @@ class Memebase {
     fun syncAllFolders(
         realm: Realm,
         ctx: Context,
-        syncFoldersIndex: Boolean = true,
-        finished: (newFolders: List<MemeFolder>) -> Unit
-    ) {
+        syncFoldersIndex: Boolean = true
+    ): List<MemeFolder> {
         if (!PainKiller().hasStoragePermission(ctx)) {
             Log.w(TAG, "Can't sync: no storage permission!")
-            finished(emptyList())
-            return
+            return emptyList()
         }
 
         isSyncing = true
 
         var newFolders = emptyList<MemeFolder>()
 
-        doAsync {
-            if (syncFoldersIndex) {
-                val foldersList = PainKiller().getAllFoldersWithImages(ctx)
-                    .map(File::getAbsolutePath)
-                uiThread {
-                    newFolders = syncFoldersIndex(realm, foldersList)
-                }
-            }
-            uiThread {
-                val foldersToSync = realm.where(MemeFolder::class.java)
-                    .equalTo(MemeFolder.IS_SCANNABLE, true).findAll()
-                syncAllFoldersRecursive(realm, foldersToSync) {
-                    // finished
-                    isSyncing = false
-                    finished(newFolders)
-                }
-            }
 
+        if (syncFoldersIndex) {
+            val foldersList = PainKiller().getAllFoldersWithImages(ctx)
+                .map(File::getAbsolutePath)
+            newFolders = syncFoldersIndex(realm, foldersList)
         }
+
+        val foldersToSync = realm.where(MemeFolder::class.java)
+            .equalTo(MemeFolder.IS_SCANNABLE, true).findAll()
+        syncAllFoldersRecursive(realm, foldersToSync)
+        isSyncing = false
+        return newFolders
     }
 
     /**
      * Recursive part of [syncAllFolders].
      *
+     * This function takes long.
+     * You need to handle async yourself.
+     *
      * @param realm [Realm]
      * @param foldersToSync list of [MemeFolder]s that are left for syncing.
-     * @param finished callback when finished.
      */
     private fun syncAllFoldersRecursive(
         realm: Realm,
-        foldersToSync: List<MemeFolder>,
-        finished: () -> Unit
+        foldersToSync: List<MemeFolder>
     ) {
         if (foldersToSync.isEmpty()) {
-            finished()
             return
         }
 
         val folder = foldersToSync.first()
-        syncFolder(realm, folder) {
-            Log.i(TAG, "Finished syncing folder ${File(folder.folderPath).name}")
-            syncAllFoldersRecursive(realm, foldersToSync.drop(1), finished)
-        }
+        syncFolder(realm, folder)
+        Log.i(TAG, "Finished syncing folder ${File(folder.folderPath).name}")
+        syncAllFoldersRecursive(realm, foldersToSync.drop(1))
     }
 
     /**
      * Scans whole [folder] recursively.
      * Make sure to sync [folder] before calling this.
+     * THIS MUST RUN ON UI THREAD!
      *
      * @param realm [Realm]
      * @param folder [MemeFolder] to scan.
@@ -324,6 +281,7 @@ class Memebase {
             return
         }
 
+        var syncingFolder = false
         isScanning = true
 
         val folderPath = folder.folderPath
@@ -388,10 +346,14 @@ class Memebase {
                 }
                 .addOnFailureListener { e ->
                     e.printStackTrace()
-                    syncFolder(
-                        realm,
-                        folder
-                    ) {} // Probably something wrong with current index if error occurred
+                    doAsync {
+                        syncingFolder = true
+                        syncFolder(
+                            realm,
+                            folder
+                        ) // Probably something wrong with current index if error occurred
+                        syncingFolder = false
+                    }
                 }
                 .continueWith {
                     trace.stop()
@@ -409,12 +371,22 @@ class Memebase {
                     progress(all, scanned)
 
                     if (changeInFolder) {
-                        syncFolder(realm, folder) {}
+                        syncingFolder = true
+                        syncFolder(realm, folder)
+                        syncingFolder = false
                     }
-                    scanningFileObserver.stopWatching()
 
-                    // This is theoretically recursion, but there is nothing big to be left in stack
-                    scanFolder(realm, ctx, folder, progress, finished)
+
+                    doAsync {
+                        while (syncingFolder);
+
+                        uiThread {
+                            scanningFileObserver.stopWatching()
+                            // This is theoretically recursion, but there is nothing big to be left in stack
+                            scanFolder(realm, ctx, folder, progress, finished)
+                        }
+                    }
+
                 }
         } else {
             isScanning = false

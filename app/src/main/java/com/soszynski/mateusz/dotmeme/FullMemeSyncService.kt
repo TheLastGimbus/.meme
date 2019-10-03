@@ -11,6 +11,8 @@ import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import io.realm.Realm
 import org.jetbrains.anko.defaultSharedPreferences
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 import java.io.File
 
 
@@ -42,10 +44,11 @@ class FullMemeSyncService : Service() {
     }
 
     private fun fullSync() {
-        val prefs = defaultSharedPreferences
-        val realm = Realm.getDefaultInstance()
-        val memebase = Memebase()
-        memebase.syncAllFolders(realm, this) { newFolders ->
+        doAsync {
+            val prefs = defaultSharedPreferences
+            val realm = Realm.getDefaultInstance()
+            val memebase = Memebase()
+            val newFolders = memebase.syncAllFolders(realm, this@FullMemeSyncService)
 
             if (newFolders.count() > 0 &&
                 prefs.getBoolean(
@@ -56,33 +59,41 @@ class FullMemeSyncService : Service() {
                 for ((index, folder) in newFolders.withIndex()) {
                     val id =
                         Notifs.NOTIFICATION_ID_NEW_FOLDER + index + 1 // because we want separate notifications
-                    NotificationManagerCompat.from(this).notify(
+                    NotificationManagerCompat.from(this@FullMemeSyncService).notify(
                         id,
-                        Notifs.getNewFolderFoundNotification(this, File(folder.folderPath), id)
+                        Notifs.getNewFolderFoundNotification(
+                            this@FullMemeSyncService,
+                            File(folder.folderPath),
+                            id
+                        )
                     )
                 }
             }
 
-            memebase.scanAllFolders(
-                realm, this,
-                { memeFolder: MemeFolder, all: Int, progress: Int ->
-                    // progress
-                    startForeground(
-                        Notifs.NOTIFICATION_ID_SYNCING,
-                        Notifs.getScanningForegroundNotification(
-                            this,
-                            File(memeFolder.folderPath).name,
-                            progress,
-                            all
+            uiThread {
+                val realm = Realm.getDefaultInstance()
+
+                memebase.scanAllFolders(
+                    realm, this@FullMemeSyncService,
+                    { memeFolder: MemeFolder, all: Int, progress: Int ->
+                        // progress
+                        startForeground(
+                            Notifs.NOTIFICATION_ID_SYNCING,
+                            Notifs.getScanningForegroundNotification(
+                                this@FullMemeSyncService,
+                                File(memeFolder.folderPath).name,
+                                progress,
+                                all
+                            )
                         )
-                    )
-                },
-                {
-                    // finished
-                    stopForeground(true)
-                    stopSelf()
-                }
-            )
+                    },
+                    {
+                        // finished
+                        stopForeground(true)
+                        stopSelf()
+                    }
+                )
+            }
         }
     }
 
@@ -98,7 +109,8 @@ class FullMemeSyncService : Service() {
         }
 
         fun isRunning(ctx: Context, needToBeForeground: Boolean = true): Boolean {
-            val am = ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager? ?: return false
+            val am =
+                ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager? ?: return false
             val runningServices = am.getRunningServices(100)
             for (serviceInfo in runningServices) {
                 if (serviceInfo.service.className == FullMemeSyncService::class.java.name) {
