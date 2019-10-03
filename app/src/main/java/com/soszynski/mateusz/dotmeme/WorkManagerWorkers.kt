@@ -16,6 +16,7 @@ class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) :
     companion object {
         const val TAG = "FullSyncWorker"
         const val UNIQUE_WORK_NAME = "unique_work_name_full_sync"
+        const val FOREGROUND_SCAN_PENDING_TRESHHOLD = 15
 
         fun isScheduled(): Boolean {
             try {
@@ -76,9 +77,15 @@ class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) :
             { memeFolder: MemeFolder, all: Int, progress: Int ->
                 // progress
                 // we have a bigger job to do here, so we will let foreground service do this
-                if (all - progress > 10) {
+                if (all - progress > FOREGROUND_SCAN_PENDING_TRESHHOLD) {
                     FullMemeSyncService.start(ctx)
                     memebase.scanningCanceled = true
+                }
+
+                if (FullMemeSyncService.isRunning(ctx)) {
+                    finished = true
+                    memebase.scanningCanceled = true
+                    return@scanAllFolders
                 }
             },
             {

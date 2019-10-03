@@ -1,7 +1,9 @@
 package com.soszynski.mateusz.dotmeme
 
+import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,8 +37,42 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
         val sw = Switch(ctx)
         sw.isChecked = folder.isScannable
         sw.setOnCheckedChangeListener { _, isChecked ->
-            realm.executeTransaction { realm ->
-                folder.isScannable = isChecked
+            if (isChecked) {
+                realm.executeTransaction { realm ->
+                    folder.isScannable = isChecked
+                }
+                // It was set to true, so it's best to start foreground service to get user his
+                // memes scanned quickly.
+                FullMemeSyncService.start(ctx)
+
+            } else {
+                val mil = System.currentTimeMillis()
+                val scannedCount = folder.memes.where()
+                    .equalTo(Meme.IS_SCANNED, true)
+                    .count()
+                Log.i(TAG, (System.currentTimeMillis() - mil).toString())
+
+                if (scannedCount > FullSyncWorker.FOREGROUND_SCAN_PENDING_TRESHHOLD) {
+                    AlertDialog.Builder(ctx)
+                        .setTitle("Are you sure you want to disable this folder?")
+                        .setMessage(
+                            "It contains $scannedCount scanned memes. " +
+                                    "You will need to wait for them to scan again to search them."
+                        )
+                        .setPositiveButton("Yes, disable it") { dialog, which ->
+                            realm.executeTransaction { realm ->
+                                folder.isScannable = isChecked
+                            }
+                        }
+                        .setNegativeButton("No, keep it") { _, _ ->
+                            sw.isChecked = true
+                        }
+                        .show()
+                } else {
+                    realm.executeTransaction { realm ->
+                        folder.isScannable = isChecked
+                    }
+                }
             }
         }
 
@@ -71,7 +107,11 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
         // This pretty much means that we are in Intro
         if (context != null) {
             val ctx = context!!
-            if (!ctx.defaultSharedPreferences.getBoolean(Prefs.Keys.SHOW_NEW_FOLDER_NOTIFICATION, true)) {
+            if (!ctx.defaultSharedPreferences.getBoolean(
+                    Prefs.Keys.SHOW_NEW_FOLDER_NOTIFICATION,
+                    true
+                )
+            ) {
                 loadSwitches(ctx)
             }
         }
