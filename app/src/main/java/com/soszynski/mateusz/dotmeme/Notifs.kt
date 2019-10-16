@@ -82,13 +82,13 @@ class Notifs {
             val yesPi = PendingIntent.getBroadcast(
                 ctx,
                 Random.nextInt(),
-                brdIntent.apply { action = "yes"; putExtra(NewFolderFoundDecisionReceiver.EXTRA_SYNC_BOOL, true) },
+                brdIntent.apply { putExtra(NewFolderFoundDecisionReceiver.EXTRA_SYNC_BOOL, true) },
                 0
             )
             val noPi = PendingIntent.getBroadcast(
                 ctx,
                 Random.nextInt(),
-                brdIntent.apply { action = "no"; putExtra(NewFolderFoundDecisionReceiver.EXTRA_SYNC_BOOL, false) },
+                brdIntent.apply { putExtra(NewFolderFoundDecisionReceiver.EXTRA_SYNC_BOOL, false) },
                 0
             )
 
