@@ -144,6 +144,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             memeFolders = results.toList()
             addRealmFoldersChangeListeners()
             setFileObservers()
+
+            results.removeAllChangeListeners()
         }
     }
 
