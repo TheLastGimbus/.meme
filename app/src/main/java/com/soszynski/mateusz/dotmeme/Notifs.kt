@@ -96,6 +96,7 @@ class Notifs {
                 .setChannelId(CHANNEL_ID_NEW_FOLDER)
                 .setSmallIcon(R.drawable.ic_launcher_icon)
                 .setColor(ctx.getColor(R.color.colorPrimary))
+                .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setContentTitle(ctx.getString(R.string.notif_title_new_folder))
                 .setStyle(
                     NotificationCompat.BigTextStyle()
@@ -122,7 +123,7 @@ class Notifs {
                     CHANNEL_ID_NEW_FOLDER,
                     ctx.getString(R.string.notif_channel_new_folder),
                     null,
-                    NotificationManager.IMPORTANCE_DEFAULT
+                    NotificationManager.IMPORTANCE_LOW
                 )
             }
         }
