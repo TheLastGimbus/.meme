@@ -11,8 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
+import coil.api.load
 import com.github.chrisbanes.photoview.PhotoView
-import com.squareup.picasso.Picasso
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_big_image.*
 import java.io.File
@@ -44,10 +44,17 @@ class BigImageActivity : AppCompatActivity() {
                 setFullscreen(!fullscreen)
             }
 
+
+            imageView.load(File(imagesPathsList[position])) {
+                crossfade(true)
+                error(R.drawable.ic_error_outline_gray_24dp)
+            }
+            /*
             Picasso.get()
                 .load(File(imagesPathsList[position]))
                 .error(R.drawable.ic_error_outline_gray_24dp)
                 .into(imageView)
+            */
 
             container.addView(imageView)
 

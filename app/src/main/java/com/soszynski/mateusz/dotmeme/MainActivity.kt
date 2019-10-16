@@ -26,8 +26,9 @@ import androidx.core.view.GravityCompat
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import coil.api.load
+import coil.size.Scale
 import com.google.android.material.navigation.NavigationView
-import com.squareup.picasso.Picasso
 import io.doorbell.android.Doorbell
 import io.realm.ObjectChangeSet
 import io.realm.Realm
@@ -221,12 +222,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 imageView = convertView as SquareImageView
             }
 
-            Picasso.get()
+            val millis = System.currentTimeMillis()
+
+            // TODO: This somehow blocks UI a bit??
+            imageView.load(images[position]) {
+                crossfade(true)
+                error(R.drawable.ic_error_outline_gray_24dp)
+                scale(Scale.FIT)
+            }
+
+            val time = System.currentTimeMillis() - millis
+            Log.i(TAG, "Loading: $time")
+
+            /*Picasso.get()
                 .load(images[position])
                 .fit()
                 .centerCrop()
                 .into(imageView)
-
+            */
             return imageView
         }
 
