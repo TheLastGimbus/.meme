@@ -20,4 +20,8 @@
     <string name="intro_1_welcome">Witaj w .meme !</string>
     <string name="toast_permission_denied">Aplikacja bez tego nie zadziała :(</string>
     <string name="navigation_drawer_about_app">O aplikacji</string>
+    <string name="settings_folders_fragment_are_you_sure_title">Na pewno chcesz wyłączyć ten folder?</string>
+    <string name="settings_folders_fragment_are_you_sure_description">Jest w nim [count] zeskanowanych memów. Będą musiały sie od nowa skanować, żeby je wyszukiwać.</string>
+    <string name="settings_folders_fragment_are_you_sure_response_yes">Tak, wyłącz go</string>
+    <string name="settings_folders_fragment_are_you_sure_response_no">Nie, zachowaj go</string>
 </resources>

@@ -55,17 +55,24 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
 
                 if (scannedCount > FullSyncWorker.FOREGROUND_SCAN_PENDING_TRESHHOLD) {
                     AlertDialog.Builder(ctx)
-                        .setTitle("Are you sure you want to disable this folder?")
+                        .setTitle(getString(R.string.settings_folders_fragment_are_you_sure_title))
                         .setMessage(
-                            "It contains $scannedCount scanned memes. " +
-                                    "You will need to wait for them to scan again to search them."
+                            getString(R.string.settings_folders_fragment_are_you_sure_description)
+                                .replace(
+                                    "[count]",
+                                    scannedCount.toString()
+                                )
                         )
-                        .setPositiveButton("Yes, disable it") { dialog, which ->
+                        .setPositiveButton(
+                            getString(R.string.settings_folders_fragment_are_you_sure_response_yes)
+                        ) { dialog, which ->
                             realm.executeTransaction { realm ->
                                 folder.isScannable = isChecked
                             }
                         }
-                        .setNegativeButton("No, keep it") { _, _ ->
+                        .setNegativeButton(
+                            getString(R.string.settings_folders_fragment_are_you_sure_response_no)
+                        ) { _, _ ->
                             sw.isChecked = true
                         }
                         .show()

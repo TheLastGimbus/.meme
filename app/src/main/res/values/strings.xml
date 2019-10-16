@@ -19,4 +19,8 @@
     <string name="intro_1_welcome">Welcome to .meme !</string>
     <string name="toast_permission_denied">App won\'t work without this :(</string>
     <string name="navigation_drawer_about_app">About app</string>
+    <string name="settings_folders_fragment_are_you_sure_title">Are you sure you want to disable this folder?\"</string>
+    <string name="settings_folders_fragment_are_you_sure_description">It contains  [count] scanned memes. You will need to wait for them to scan again to search them.</string>
+    <string name="settings_folders_fragment_are_you_sure_response_yes">Yes, disable it</string>
+    <string name="settings_folders_fragment_are_you_sure_response_no">No, keep it</string>
 </resources>
