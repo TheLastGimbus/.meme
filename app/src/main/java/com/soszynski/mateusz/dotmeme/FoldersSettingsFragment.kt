@@ -2,6 +2,7 @@ package com.soszynski.mateusz.dotmeme
 
 import android.app.AlertDialog
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -100,7 +101,9 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
             linLay.setPadding(25, 25, 25, 25)
             mainView.linearLayout_folders.addView(linLay)
         }
-        mainView.linearLayout_folders.setPaddingRelative(20, 20, 20, 20)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            mainView.linearLayout_folders.setPaddingRelative(20, 20, 20, 20)
+        }
     }
 
     override fun onChange(t: Realm) {
