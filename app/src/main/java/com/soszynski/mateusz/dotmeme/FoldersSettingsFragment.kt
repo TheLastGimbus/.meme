@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,11 +46,9 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
                 FullMemeSyncService.start(ctx)
 
             } else {
-                val mil = System.currentTimeMillis()
                 val scannedCount = folder.memes.where()
                     .equalTo(Meme.IS_SCANNED, true)
                     .count()
-                Log.i(TAG, (System.currentTimeMillis() - mil).toString())
 
                 if (scannedCount > FullSyncWorker.FOREGROUND_SCAN_PENDING_TRESHHOLD) {
                     AlertDialog.Builder(ctx)
