@@ -38,9 +38,19 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
         sw.isChecked = folder.isScannable
         sw.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                realm.executeTransaction { realm ->
-                    folder.isScannable = isChecked
-                }
+                // I don't know why this ONE SIMPLE OPERATION
+                // LITERALLY SWITCHING 1 to 0
+                // needs to be async
+                val folderPath = folder.folderPath
+                realm.executeTransactionAsync(
+                    { realm ->
+                        val folder = realm.where(MemeFolder::class.java)
+                            .equalTo(MemeFolder.FOLDER_PATH, folderPath)
+                            .findFirst()!!
+                        folder.isScannable = isChecked
+                    }, {}, { it.printStackTrace() }
+                )
+
                 // It was set to true, so it's best to start foreground service to get user his
                 // memes scanned quickly.
                 FullMemeSyncService.start(ctx)
@@ -63,9 +73,19 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
                         .setPositiveButton(
                             getString(R.string.settings_folders_fragment_are_you_sure_response_yes)
                         ) { dialog, which ->
-                            realm.executeTransaction { realm ->
-                                folder.isScannable = isChecked
-                            }
+
+                            // I don't know why this ONE SIMPLE OPERATION
+                            // LITERALLY SWITCHING 1 to 0
+                            // needs to be async
+                            val folderPath = folder.folderPath
+                            realm.executeTransactionAsync(
+                                { realm ->
+                                    val folder = realm.where(MemeFolder::class.java)
+                                        .equalTo(MemeFolder.FOLDER_PATH, folderPath)
+                                        .findFirst()!!
+                                    folder.isScannable = isChecked
+                                }, {}, { it.printStackTrace() }
+                            )
                         }
                         .setNegativeButton(
                             getString(R.string.settings_folders_fragment_are_you_sure_response_no)
@@ -74,9 +94,18 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
                         }
                         .show()
                 } else {
-                    realm.executeTransaction { realm ->
-                        folder.isScannable = isChecked
-                    }
+                    // I don't know why this ONE SIMPLE OPERATION
+                    // LITERALLY SWITCHING 1 to 0
+                    // needs to be async
+                    val folderPath = folder.folderPath
+                    realm.executeTransactionAsync(
+                        { realm ->
+                            val folder = realm.where(MemeFolder::class.java)
+                                .equalTo(MemeFolder.FOLDER_PATH, folderPath)
+                                .findFirst()!!
+                            folder.isScannable = isChecked
+                        }, {}, { it.printStackTrace() }
+                    )
                 }
             }
         }
