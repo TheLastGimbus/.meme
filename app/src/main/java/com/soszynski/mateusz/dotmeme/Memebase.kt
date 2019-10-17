@@ -507,4 +507,17 @@ class Memebase {
         return finalList
     }
 
+    fun getMemeRoll(realm: Realm): List<File> {
+        val filesList = realm
+            .where(MemeFolder::class.java)
+            .equalTo(MemeFolder.IS_SCANNABLE, true)
+            .findAll()
+            .map { it.memes }
+            .flatten()
+            .map { File(it.filePath) }
+            .sortedByDescending { it.lastModified() }
+
+        return filesList
+    }
+
 }

@@ -69,14 +69,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun getMemeRoll(result: (roll: List<File>) -> Unit) {
         doAsync {
             val realmAsync = Realm.getDefaultInstance() // so we don't mess up between threads
-            val filesList = realmAsync
-                .where(MemeFolder::class.java)
-                .equalTo(MemeFolder.IS_SCANNABLE, true)
-                .findAll()
-                .map { it.memes }
-                .flatten()
-                .map { File(it.filePath) }
-                .sortedByDescending { it.lastModified() }
+            val filesList = memebase.getMemeRoll(realmAsync)
 
             realmAsync.close()
             uiThread {
