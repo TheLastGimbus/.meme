@@ -24,4 +24,6 @@
     <string name="settings_folders_fragment_are_you_sure_description">Jest w nim [count] zeskanowanych memów. Będą musiały sie od nowa skanować, żeby je wyszukiwać.</string>
     <string name="settings_folders_fragment_are_you_sure_response_yes">Tak, wyłącz go</string>
     <string name="settings_folders_fragment_are_you_sure_response_no">Nie, zachowaj go</string>
+    <string name="wait">Zaczekaj chwilke</string>
+    <string name="this_wont_take_long">To nie potrwa długo</string>
 </resources>

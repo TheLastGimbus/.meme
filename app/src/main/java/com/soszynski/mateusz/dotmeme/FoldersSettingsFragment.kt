@@ -37,7 +37,17 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
         val sw = Switch(ctx)
         sw.isChecked = folder.isScannable
         sw.setOnCheckedChangeListener { _, isChecked ->
+            // This dialog will be displayed when user needs to wait for
+            // switching folder on/off taking SO DAMN LONG
+            val dialogWaitBuilder = AlertDialog.Builder(ctx)
+                .setTitle(ctx.getString(R.string.wait))
+                .setMessage(ctx.getString(R.string.this_wont_take_long))
+                .setCancelable(false)
+            var dialogWait: AlertDialog? = null
+
             if (isChecked) {
+                dialogWait = dialogWaitBuilder.show()
+
                 // I don't know why this ONE SIMPLE OPERATION
                 // LITERALLY SWITCHING 1 to 0
                 // needs to be async
@@ -48,7 +58,7 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
                             .equalTo(MemeFolder.FOLDER_PATH, folderPath)
                             .findFirst()!!
                         folder.isScannable = isChecked
-                    }, {}, { it.printStackTrace() }
+                    }, { dialogWait?.dismiss() }, { it.printStackTrace() }
                 )
 
                 // It was set to true, so it's best to start foreground service to get user his
@@ -74,6 +84,8 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
                             getString(R.string.settings_folders_fragment_are_you_sure_response_yes)
                         ) { dialog, which ->
 
+                            dialogWait = dialogWaitBuilder.show()
+
                             // I don't know why this ONE SIMPLE OPERATION
                             // LITERALLY SWITCHING 1 to 0
                             // needs to be async
@@ -84,7 +96,7 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
                                         .equalTo(MemeFolder.FOLDER_PATH, folderPath)
                                         .findFirst()!!
                                     folder.isScannable = isChecked
-                                }, {}, { it.printStackTrace() }
+                                }, { dialogWait?.dismiss() }, { it.printStackTrace() }
                             )
                         }
                         .setNegativeButton(
@@ -95,6 +107,8 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
                         .setCancelable(false)
                         .show()
                 } else {
+                    dialogWait = dialogWaitBuilder.show()
+
                     // I don't know why this ONE SIMPLE OPERATION
                     // LITERALLY SWITCHING 1 to 0
                     // needs to be async
@@ -105,7 +119,7 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
                                 .equalTo(MemeFolder.FOLDER_PATH, folderPath)
                                 .findFirst()!!
                             folder.isScannable = isChecked
-                        }, {}, { it.printStackTrace() }
+                        }, { dialogWait?.dismiss() }, { it.printStackTrace() }
                     )
                 }
             }
