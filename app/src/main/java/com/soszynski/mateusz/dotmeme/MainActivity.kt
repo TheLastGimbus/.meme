@@ -26,8 +26,8 @@ import androidx.core.view.GravityCompat
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import coil.api.load
-import coil.size.Scale
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.google.android.material.navigation.NavigationView
 import io.doorbell.android.Doorbell
 import io.realm.ObjectChangeSet
@@ -222,24 +222,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 imageView = convertView as SquareImageView
             }
 
-            val millis = System.currentTimeMillis()
-
-            // TODO: This somehow blocks UI a bit??
-            imageView.load(images[position]) {
-                crossfade(true)
-                error(R.drawable.ic_error_outline_gray_24dp)
-                scale(Scale.FIT)
-            }
-
-            val time = System.currentTimeMillis() - millis
-            Log.i(TAG, "Loading: $time")
-
-            /*Picasso.get()
+            Glide.with(this@MainActivity)
                 .load(images[position])
-                .fit()
+                .error(R.drawable.ic_error_outline_gray_24dp)
+                .transition(DrawableTransitionOptions.withCrossFade())
                 .centerCrop()
                 .into(imageView)
-            */
+
             return imageView
         }
 

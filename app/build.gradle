@@ -51,9 +51,10 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.1.0'
     implementation 'com.google.android.material:material:1.0.0'
 
-    implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation "io.coil-kt:coil:0.7.0"
-
+    // implementation 'com.squareup.picasso:picasso:2.71828'
+    // implementation "io.coil-kt:coil:0.7.0"
+    implementation 'com.github.bumptech.glide:glide:4.10.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.10.0'
 
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 

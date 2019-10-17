@@ -11,7 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
-import coil.api.load
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.github.chrisbanes.photoview.PhotoView
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_big_image.*
@@ -45,16 +46,11 @@ class BigImageActivity : AppCompatActivity() {
             }
 
 
-            imageView.load(File(imagesPathsList[position])) {
-                crossfade(true)
-                error(R.drawable.ic_error_outline_gray_24dp)
-            }
-            /*
-            Picasso.get()
+            Glide.with(this@BigImageActivity)
                 .load(File(imagesPathsList[position]))
                 .error(R.drawable.ic_error_outline_gray_24dp)
+                .transition(DrawableTransitionOptions.withCrossFade())
                 .into(imageView)
-            */
 
             container.addView(imageView)
 
