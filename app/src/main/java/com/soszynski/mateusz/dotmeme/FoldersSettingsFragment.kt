@@ -92,6 +92,7 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
                         ) { _, _ ->
                             sw.isChecked = true
                         }
+                        .setCancelable(false)
                         .show()
                 } else {
                     // I don't know why this ONE SIMPLE OPERATION
