@@ -230,6 +230,10 @@ class Memebase {
         val foldersToSync = realm.where(MemeFolder::class.java)
             .equalTo(MemeFolder.IS_SCANNABLE, true).findAll()
         syncAllFoldersRecursive(realm, foldersToSync)
+
+        val roll = getMemeRoll(realm)
+        MemeRoll.cacheRoll(realm, roll)
+
         isSyncing = false
         return newFolders
     }
@@ -518,6 +522,22 @@ class Memebase {
             .sortedByDescending { it.lastModified() }
 
         return filesList
+    }
+
+    fun getCachedMemeRoll(realm: Realm): List<File> {
+        var cachedRoll = realm.where(MemeRoll::class.java).findFirst()
+        if (cachedRoll == null) {
+            MemeRoll.cacheRoll(realm, getMemeRoll(realm))
+            cachedRoll = realm.where(MemeRoll::class.java).findFirst()!!
+        }
+        if (cachedRoll.roll.count() == 0) {
+
+        }
+        return cachedRoll.roll.map { File(it) }
+    }
+
+    fun cacheRoll(realm: Realm) {
+        MemeRoll.cacheRoll(realm, getMemeRoll(realm))
     }
 
 }

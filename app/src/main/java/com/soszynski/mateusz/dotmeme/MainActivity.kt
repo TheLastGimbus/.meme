@@ -33,6 +33,7 @@ import com.google.android.material.navigation.NavigationView
 import io.doorbell.android.Doorbell
 import io.realm.ObjectChangeSet
 import io.realm.Realm
+import io.realm.RealmConfiguration
 import io.realm.RealmObjectChangeListener
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.defaultSharedPreferences
@@ -51,9 +52,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private val memebase = Memebase()
-    private var realm: Realm = Realm.getDefaultInstance()
-    private var memeFolders: List<MemeFolder> =
-        realm.where(MemeFolder::class.java).findAll().toList()
+    private lateinit var realm: Realm
+    private lateinit var memeFolders: List<MemeFolder>
 
     private lateinit var prefChangeListener: SharedPreferences.OnSharedPreferenceChangeListener
     private var fileObservers = mutableListOf<FileObserver>()
@@ -67,10 +67,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var searchMode = false
 
 
-    private fun getMemeRoll(result: (roll: List<File>) -> Unit) {
+    private fun getMemeRoll(fromCache: Boolean = false, result: (roll: List<File>) -> Unit) {
         doAsync {
             val realmAsync = Realm.getDefaultInstance() // so we don't mess up between threads
-            val filesList = memebase.getMemeRoll(realmAsync)
+            val filesList =
+                if (fromCache) memebase.getCachedMemeRoll(realmAsync)
+                else memebase.getMemeRoll(realmAsync)
 
             realmAsync.close()
             uiThread {
@@ -79,7 +81,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    private fun updateVisibleMemeRoll(finished: () -> Unit = {}) {
+    private fun updateVisibleMemeRoll(fromCache: Boolean = false, finished: () -> Unit = {}) {
         if (updateVisibleMemeRollRunning) {
             updateVisibleMemeRollScheduled = true
             return
@@ -88,7 +90,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         updateVisibleMemeRollRunning = true
 
         updateFoldersList()
-        getMemeRoll { memeRoll ->
+        getMemeRoll(fromCache) { memeRoll ->
             if (!searchMode && memeRoll != lastMemeRoll) {
                 lastMemeRoll = memeRoll
                 gridView_meme_roll.adapter = ImageAdapter(memeRoll)
@@ -97,7 +99,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             if (updateVisibleMemeRollScheduled) {
                 updateVisibleMemeRollScheduled = false
-                updateVisibleMemeRoll(finished)
+                updateVisibleMemeRoll(fromCache, finished)
             } else {
                 finished()
             }
@@ -105,13 +107,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun syncAndUpdateRoll(finished: () -> Unit = {}) {
-        if (FullMemeSyncService.isRunning(this)) {
-            updateVisibleMemeRoll {
-                finished()
-            }
-            return
-        }
-
         if (!memebase.isSyncing) {
             doAsync {
                 val realm = Realm.getDefaultInstance()
@@ -126,7 +121,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         }
                     }
                 }
-
+                realm.close()
             }
         } else {
             syncScheduled = true
@@ -259,6 +254,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onChange(t: MemeFolder, changeSet: ObjectChangeSet?) {
         if (changeSet != null && changeSet.isFieldChanged(MemeFolder.IS_SCANNABLE)) {
+            Log.i(TAG, "Sync and update im MainActivity due to change in folder settings")
             syncAndUpdateRoll()
         }
     }
@@ -268,6 +264,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(R.layout.activity_main)
         nav_view.setNavigationItemSelectedListener(this)
 
+
+        val config = RealmConfiguration.Builder()
+            .schemaVersion(1)
+            .migration(RollMigration())
+            .build()
+
+        Realm.setDefaultConfiguration(config)
 
         realm = Realm.getDefaultInstance()
         val prefs = defaultSharedPreferences
@@ -293,7 +296,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // get current index
         progressBar_loading.visibility = ProgressBar.VISIBLE
-        updateVisibleMemeRoll {
+        updateVisibleMemeRoll(true) {
             progressBar_loading.visibility = ProgressBar.GONE
         }
 

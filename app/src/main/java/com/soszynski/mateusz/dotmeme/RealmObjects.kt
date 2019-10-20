@@ -1,9 +1,11 @@
 package com.soszynski.mateusz.dotmeme
 
+import io.realm.Realm
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 import io.realm.annotations.Required
+import java.io.File
 
 /**
  * [RealmObject] class containing one meme.
@@ -63,6 +65,33 @@ open class MemeFolder : RealmObject() {
          */
         fun isFolderFullyScanned(folder: MemeFolder): Boolean {
             return folder.memes.where().equalTo(Meme.IS_SCANNED, false).count().toInt() == 0
+        }
+    }
+}
+
+open class MemeRoll : RealmObject() {
+    @PrimaryKey
+    var id = 1
+
+    var roll: RealmList<String> = RealmList<String>()
+
+    companion object {
+        const val ROLL = "roll"
+        const val ID = "id"
+
+        fun cacheRoll(realm: Realm, roll: List<File>) {
+            realm.executeTransaction {
+
+                val realmRoll = realm.where(MemeRoll::class.java).findFirst()
+                if (realmRoll == null) {
+                    val newRealmRoll = MemeRoll()
+                    newRealmRoll.roll.addAll(roll.map { it.absolutePath })
+                    realm.copyToRealm(newRealmRoll)
+                } else {
+                    realmRoll.roll.clear()
+                    realmRoll.roll.addAll(roll.map { it.absolutePath })
+                }
+            }
         }
     }
 }
