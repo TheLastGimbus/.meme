@@ -61,10 +61,6 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
                     }, { dialogWait?.dismiss() }, { it.printStackTrace() }
                 )
 
-                // It was set to true, so it's best to start foreground service to get user his
-                // memes scanned quickly.
-                FullMemeSyncService.start(ctx)
-
             } else {
                 val scannedCount = folder.memes.where()
                     .equalTo(Meme.IS_SCANNED, true)
