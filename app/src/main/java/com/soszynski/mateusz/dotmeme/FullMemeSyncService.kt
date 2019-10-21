@@ -10,6 +10,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import io.realm.Realm
+import io.realm.RealmConfiguration
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -46,6 +47,13 @@ class FullMemeSyncService : Service() {
     private fun fullSync() {
         doAsync {
             val prefs = defaultSharedPreferences
+
+            val config = RealmConfiguration.Builder()
+                .schemaVersion(1)
+                .migration(RollMigration())
+                .build()
+            Realm.setDefaultConfiguration(config)
+
             val realm = Realm.getDefaultInstance()
             val memebase = Memebase()
             val newFolders = memebase.syncAllFolders(realm, this@FullMemeSyncService)
