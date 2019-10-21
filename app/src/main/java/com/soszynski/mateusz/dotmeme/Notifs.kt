@@ -38,16 +38,12 @@ class Notifs {
             progress: Int?,
             max: Int?
         ): Notification {
-            val piMain = PendingIntent
-                .getActivity(ctx, 0, Intent(ctx, MainActivity::class.java), 0)
-
             val builder = NotificationCompat.Builder(ctx, CHANNEL_ID_SYNCING)
                 .setChannelId(CHANNEL_ID_SYNCING)
                 .setSmallIcon(R.drawable.ic_launcher_icon)
                 .setColor(ctx.getColor(R.color.colorPrimary))
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setContentTitle("Scanning memes...")
-                .setContentIntent(piMain)
 
             if (!folderName.isNullOrEmpty()) {
                 builder.setStyle(
