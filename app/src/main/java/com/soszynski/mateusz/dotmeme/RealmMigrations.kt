@@ -23,7 +23,7 @@ class RollMigration : RealmMigration {
     }
 
     override fun hashCode(): Int {
-        return RollMigration::class.java.hashCode()
+        return 37 // don't know why 37, it's from stackoverflow
     }
 
     override fun equals(other: Any?): Boolean {
