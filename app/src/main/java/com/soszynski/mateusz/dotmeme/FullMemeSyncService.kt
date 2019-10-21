@@ -10,7 +10,6 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import io.realm.Realm
-import io.realm.RealmConfiguration
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -32,6 +31,7 @@ class FullMemeSyncService : Service() {
     override fun onCreate() {
         super.onCreate()
 
+        Log.i(TAG, "Full sync foreground service started")
         if (!PainKiller().hasStoragePermission(this)) {
             Log.w(TAG, "Can't start foreground service: no storage permission!")
             return
@@ -48,14 +48,10 @@ class FullMemeSyncService : Service() {
         doAsync {
             val prefs = defaultSharedPreferences
 
-            val config = RealmConfiguration.Builder()
-                .schemaVersion(1)
-                .migration(RollMigration())
-                .build()
-            Realm.setDefaultConfiguration(config)
-
             val realm = Realm.getDefaultInstance()
             val memebase = Memebase()
+
+            Log.i(TAG, "Syncing all folders...")
             val newFolders = memebase.syncAllFolders(realm, this@FullMemeSyncService)
 
             if (newFolders.count() > 0 &&
@@ -64,6 +60,7 @@ class FullMemeSyncService : Service() {
                     Prefs.Defaults.SHOW_NEW_FOLDER_NOTIFICATION
                 )
             ) {
+                Log.i(TAG, "Showing notifications about new folders")
                 for ((index, folder) in newFolders.withIndex()) {
                     val id =
                         Notifs.NOTIFICATION_ID_NEW_FOLDER + index + 1 // because we want separate notifications
@@ -80,7 +77,7 @@ class FullMemeSyncService : Service() {
 
             uiThread {
                 val realm = Realm.getDefaultInstance()
-
+                Log.i(TAG, "Scanning all folders")
                 memebase.scanAllFolders(
                     realm, this@FullMemeSyncService,
                     { memeFolder: MemeFolder, all: Int, progress: Int ->
