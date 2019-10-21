@@ -74,6 +74,7 @@ class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) :
 
         // foreground service is running, so we don't need to scan
         if (FullMemeSyncService.isRunning(ctx)) {
+            realm.close()
             finished = true
             return Result.success()
         }
@@ -100,6 +101,7 @@ class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) :
             }
         )
         while (!finished);
+        realm.close()
         return Result.success()
     }
 }
