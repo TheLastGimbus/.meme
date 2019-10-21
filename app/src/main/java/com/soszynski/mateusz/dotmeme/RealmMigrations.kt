@@ -11,7 +11,7 @@ class RollMigration : RealmMigration {
         Log.i(TAG, "Roll migration running, old version: $oldVersion, new version: $newVersion")
         val schema = realm.schema
 
-        if (oldVersion.equals(1)) {
+        if (oldVersion.toInt() == 0) {
             val objSchema = schema.createWithPrimaryKeyField(
                 "MemeRoll",
                 MemeRoll.ID,
