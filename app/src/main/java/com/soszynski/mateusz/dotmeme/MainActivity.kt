@@ -445,6 +445,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.nav_about -> {
                 startActivity(Intent(this, AboutActivity::class.java))
             }
+            R.id.nav_force_sync -> {
+                FullMemeSyncService.start(this)
+            }
         }
 
         drawer_layout.closeDrawer(GravityCompat.START)
