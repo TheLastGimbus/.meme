@@ -216,6 +216,13 @@ class Memebase {
             return emptyList()
         }
 
+        val trace =
+            if (syncFoldersIndex)
+                FirebasePerformance.startTrace("memebase_sync_all_folders_with_index")
+            else
+                FirebasePerformance.startTrace("memebase_sync_all_folders_without_index")
+        trace.start()
+
         isSyncing = true
 
         var newFolders = emptyList<MemeFolder>()
@@ -233,6 +240,12 @@ class Memebase {
 
         val roll = getMemeRoll(realm)
         MemeRoll.cacheRoll(realm, roll)
+
+        trace.putMetric(
+            "realm_file_size_mb",
+            ((File(realm.path).length() / 1024) / 1024)
+        )
+        trace.stop()
 
         isSyncing = false
         return newFolders
