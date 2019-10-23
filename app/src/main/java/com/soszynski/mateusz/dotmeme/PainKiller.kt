@@ -30,7 +30,8 @@ class PainKiller {
      * @return all folders with images found on device.
      */
     fun getAllFoldersWithImages(ctx: Context, includeHidden: Boolean = false): List<File> {
-        val trace = FirebasePerformance.getInstance().newTrace("painkiller_get_all_folders_with_images")
+        val trace = FirebasePerformance.getInstance()
+            .newTrace("painkiller_get_all_folders_with_images")
         trace.start()
         val dirs =
             searchForPhotoDirs(ctx, Environment.getExternalStorageDirectory()) +
@@ -56,7 +57,9 @@ class PainKiller {
 
         return folder.listFiles { file ->
             // Idk, is it 1024 or 1000, but let's just keep it 1024
-            return@listFiles file.isFile && file.canRead() && (file.length() / 1024) > 4 && isFileImage(file)
+            return@listFiles file.isFile && file.canRead() && (file.length() / 1024) > 4 && isFileImage(
+                file
+            )
         }.toList()
     }
 
@@ -65,7 +68,11 @@ class PainKiller {
      *
      * @return list of found folders.
      */
-    private fun searchForPhotoDirs(ctx: Context, path: File, includeHidden: Boolean = false): List<File> {
+    private fun searchForPhotoDirs(
+        ctx: Context,
+        path: File,
+        includeHidden: Boolean = false
+    ): List<File> {
         val dirs = mutableListOf<File>()
 
         val childrenPaths = path.listFiles()
