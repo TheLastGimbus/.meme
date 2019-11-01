@@ -73,6 +73,10 @@ class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) :
             return Result.success()
         }
 
+        if (PainKiller().isPowerSaverOn(ctx)) {
+            realm.close()
+            return Result.success()
+        }
         memebase.scanAllFolders(
             realm, ctx,
             { memeFolder: MemeFolder, all: Int, progress: Int ->

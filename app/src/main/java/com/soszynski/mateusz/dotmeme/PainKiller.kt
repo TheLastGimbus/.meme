@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.os.PowerManager
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
@@ -13,6 +14,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.google.firebase.perf.FirebasePerformance
 import java.io.File
+
 
 /**
  * This is class where are all the annoying, boilerplate things.
@@ -137,5 +139,13 @@ class PainKiller {
     fun hasStoragePermission(ctx: Context): Boolean {
         return ContextCompat.checkSelfPermission(ctx, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
                 PackageManager.PERMISSION_GRANTED
+    }
+
+    fun isPowerSaverOn(ctx: Context): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val powerManager = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
+            return powerManager.isPowerSaveMode
+        }
+        return false
     }
 }
