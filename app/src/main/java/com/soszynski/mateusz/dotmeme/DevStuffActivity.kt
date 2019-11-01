@@ -61,7 +61,7 @@ class DevStuffActivity : AppCompatActivity() {
 
         button_sync.setOnClickListener {
             val request = OneTimeWorkRequestBuilder<FullSyncWorker>().build()
-            WorkManager.getInstance().enqueue(request)
+            WorkManager.getInstance(this).enqueue(request)
         }
     }
 }

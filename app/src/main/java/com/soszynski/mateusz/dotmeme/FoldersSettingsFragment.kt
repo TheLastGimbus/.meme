@@ -43,7 +43,7 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
                 .setTitle(ctx.getString(R.string.wait))
                 .setMessage(ctx.getString(R.string.this_wont_take_long))
                 .setCancelable(false)
-            var dialogWait: AlertDialog? = null
+            var dialogWait: AlertDialog?
 
             if (isChecked) {
                 dialogWait = dialogWaitBuilder.show()
