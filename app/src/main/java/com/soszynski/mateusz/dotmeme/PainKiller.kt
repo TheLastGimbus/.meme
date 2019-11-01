@@ -4,10 +4,12 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.google.firebase.perf.FirebasePerformance
 import java.io.File
@@ -109,7 +111,8 @@ class PainKiller {
      *
      * @return real path from given [Uri]
      */
-    fun getRealPathFromUri(ctx: Context, uri: Uri): String {
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    fun getRealPathFromUri(ctx: Context, uri: Uri): String? {
         var filePath = ""
         val wholeID = DocumentsContract.getDocumentId(uri)
         val id = wholeID.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
@@ -119,6 +122,9 @@ class PainKiller {
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             column, sel, arrayOf(id), null
         )
+        if (cursor == null) {
+            return null
+        }
         val columnIndex = cursor.getColumnIndex(column[0])
         if (cursor.moveToFirst()) {
             filePath = cursor.getString(columnIndex)
