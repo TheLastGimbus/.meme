@@ -62,9 +62,9 @@ dependencies {
 
     implementation "androidx.work:work-runtime-ktx:2.2.0"
 
-    implementation 'com.google.firebase:firebase-core:17.2.0'
-    implementation 'com.google.firebase:firebase-ml-vision:23.0.0'
-    implementation 'com.google.firebase:firebase-perf:19.0.0'
+    implementation 'com.google.firebase:firebase-core:17.2.1'
+    implementation 'com.google.firebase:firebase-ml-vision:24.0.0'
+    implementation 'com.google.firebase:firebase-perf:19.0.1'
 
     implementation 'org.jetbrains.anko:anko-common:0.9'
 
