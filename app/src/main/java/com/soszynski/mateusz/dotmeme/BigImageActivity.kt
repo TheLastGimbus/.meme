@@ -49,7 +49,7 @@ class BigImageActivity : AppCompatActivity() {
             Glide.with(this@BigImageActivity)
                 .load(File(imagesPathsList[position]))
                 .error(R.drawable.ic_error_outline_gray_24dp)
-                .transition(DrawableTransitionOptions.withCrossFade())
+                .transition(DrawableTransitionOptions.withCrossFade(75))
                 .into(imageView)
 
             container.addView(imageView)
