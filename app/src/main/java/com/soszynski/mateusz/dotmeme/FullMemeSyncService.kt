@@ -48,6 +48,7 @@ class FullMemeSyncService : Service() {
         doAsync {
             val prefs = defaultSharedPreferences
 
+            Memebase.handleRealmConfigs()
             val realm = Realm.getDefaultInstance()
             val memebase = Memebase()
 

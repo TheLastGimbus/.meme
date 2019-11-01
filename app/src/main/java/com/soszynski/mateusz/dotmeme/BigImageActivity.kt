@@ -110,6 +110,8 @@ class BigImageActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Memebase.handleRealmConfigs()
         realm = Realm.getDefaultInstance()
         setContentView(R.layout.activity_big_image)
         button_back.setOnClickListener {

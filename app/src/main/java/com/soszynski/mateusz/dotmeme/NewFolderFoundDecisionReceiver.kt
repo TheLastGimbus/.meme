@@ -16,6 +16,7 @@ class NewFolderFoundDecisionReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(ctx: Context, intent: Intent) {
+        Memebase.handleRealmConfigs()
         val realm = Realm.getDefaultInstance()
 
         val folderPath = intent.getStringExtra(EXTRA_FOLDER_PATH)

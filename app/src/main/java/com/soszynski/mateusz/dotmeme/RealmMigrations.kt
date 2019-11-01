@@ -22,13 +22,14 @@ class RollMigration : RealmMigration {
         }
     }
 
-    override fun hashCode(): Int {
-        return 37 // don't know why 37, it's from stackoverflow
-    }
-
     override fun equals(other: Any?): Boolean {
         return other is Migration
     }
+
+    override fun hashCode(): Int {
+        return javaClass.hashCode()
+    }
+
 
     companion object {
         const val TAG = "Realm RollMigration"

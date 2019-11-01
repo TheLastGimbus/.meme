@@ -33,7 +33,6 @@ import com.google.android.material.navigation.NavigationView
 import io.doorbell.android.Doorbell
 import io.realm.ObjectChangeSet
 import io.realm.Realm
-import io.realm.RealmConfiguration
 import io.realm.RealmObjectChangeListener
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.defaultSharedPreferences
@@ -265,13 +264,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.setNavigationItemSelectedListener(this)
 
 
-        val config = RealmConfiguration.Builder()
-            .schemaVersion(1)
-            .migration(RollMigration())
-            .build()
-
-        Realm.setDefaultConfiguration(config)
-
+        Memebase.handleRealmConfigs()
         realm = Realm.getDefaultInstance()
         val prefs = defaultSharedPreferences
         if (prefs.getBoolean(Prefs.Keys.FIRST_LAUNCH, true)) {

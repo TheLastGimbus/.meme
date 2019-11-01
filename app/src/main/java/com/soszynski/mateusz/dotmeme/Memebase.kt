@@ -8,6 +8,7 @@ import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.perf.FirebasePerformance
 import io.realm.Realm
+import io.realm.RealmConfiguration
 import org.apache.commons.lang3.StringUtils
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -25,6 +26,16 @@ import java.io.File
 class Memebase {
     companion object {
         const val TAG = "Memebase class"
+
+        fun handleRealmConfigs() {
+            if (Realm.getDefaultConfiguration()?.schemaVersion!! < 1) {
+                val config = RealmConfiguration.Builder()
+                    .schemaVersion(1)
+                    .migration(RollMigration())
+                    .build()
+                Realm.setDefaultConfiguration(config)
+            }
+        }
     }
 
     private lateinit var scanningFileObserver: FileObserver

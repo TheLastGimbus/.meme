@@ -168,7 +168,7 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
+        Memebase.handleRealmConfigs()
         realm = Realm.getDefaultInstance()
         realm.addChangeListener(this)
 

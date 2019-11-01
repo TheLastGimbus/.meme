@@ -8,7 +8,6 @@ import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import io.realm.Realm
-import io.realm.RealmConfiguration
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 
@@ -46,12 +45,7 @@ class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) :
 
         val prefs = ctx.defaultSharedPreferences
 
-        val config = RealmConfiguration.Builder()
-            .schemaVersion(1)
-            .migration(RollMigration())
-            .build()
-        Realm.setDefaultConfiguration(config)
-
+        Memebase.handleRealmConfigs()
         val realm = Realm.getDefaultInstance()
         val memebase = Memebase()
         val newFolders = memebase.syncAllFolders(realm, ctx)

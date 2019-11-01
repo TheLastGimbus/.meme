@@ -17,6 +17,7 @@ class Intro1Fragment : Fragment() {
 
     private fun doSync(ctx: Context) {
         doAsync {
+            Memebase.handleRealmConfigs()
             val realm = Realm.getDefaultInstance()
             val prefs = ctx.defaultSharedPreferences
 
