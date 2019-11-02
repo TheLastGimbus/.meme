@@ -135,7 +135,9 @@ class Memebase {
                     .not().`in`(MemeFolder.FOLDER_PATH, officialPaths.toTypedArray()).findAll()
             else
                 realm.where(MemeFolder::class.java)
-                    .not().`in`(MemeFolder.FOLDER_PATH, devicePaths.toTypedArray()).findAll()
+                    .not().`in`(MemeFolder.FOLDER_PATH, devicePaths.toTypedArray())
+                    .not().`in`(MemeFolder.FOLDER_PATH, officialPaths.toTypedArray())
+                    .findAll()
 
             if (result.count() > 0) {
                 Log.i(
