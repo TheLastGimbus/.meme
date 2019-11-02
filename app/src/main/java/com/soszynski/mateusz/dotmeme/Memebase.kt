@@ -249,8 +249,7 @@ class Memebase {
             .equalTo(MemeFolder.IS_SCANNABLE, true).findAll()
         syncAllFoldersRecursive(realm, foldersToSync)
 
-        val roll = getMemeRoll(realm)
-        MemeRoll.cacheRoll(realm, roll)
+        cacheRoll(realm)
 
         trace.putMetric(
             "realm_file_size_mb",
