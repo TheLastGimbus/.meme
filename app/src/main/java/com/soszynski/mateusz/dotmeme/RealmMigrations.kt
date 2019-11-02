@@ -36,3 +36,22 @@ class RollMigration : RealmMigration {
     }
 
 }
+
+class OfficialFoldersMigration : RealmMigration {
+    companion object {
+        const val TAG = "OfficialFoldersMig"
+    }
+
+    override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
+        Log.i(
+            TAG, "OfficialFolders migration running, " +
+                    "old version: $oldVersion, new version: $newVersion"
+        )
+        val schema = realm.schema
+        if (oldVersion < 2) {
+            val folderSchema = schema.get("MemeFolder")!!
+            folderSchema.addField(MemeFolder.IS_OFFICIAL, Boolean::class.java)
+        }
+    }
+
+}

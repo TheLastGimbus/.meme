@@ -51,12 +51,14 @@ open class MemeFolder : RealmObject() {
 
     var isScannable: Boolean = false
     var sdCard: Boolean = false
+    var isOfficial = false
     var memes: RealmList<Meme> = RealmList()
 
     companion object {
         const val FOLDER_PATH = "folderPath"
         const val IS_SCANNABLE = "isScannable"
         const val SD_CARD = "sdCard"
+        const val IS_OFFICIAL = "isOfficial"
         const val MEMES = "memes"
 
         /**
