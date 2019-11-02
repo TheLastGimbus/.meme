@@ -58,12 +58,17 @@ class Memebase {
      *
      * @param realm
      * @param paths list of paths on device that contain photos.
+     * @param officialPaths list of official paths that are almost guaranteed to contain photos
      *
      * @return new folders. This can be used to ask user whether to sync those new folders.
      */
-    private fun syncFoldersIndex(realm: Realm, paths: List<String>): List<MemeFolder> {
-        val newFolders = addNewFolders(realm, paths)
-        deleteNotExistingFolders(realm, paths)
+    private fun syncFoldersIndex(
+        realm: Realm,
+        paths: List<String>,
+        officialPaths: List<String>
+    ): List<MemeFolder> {
+        val newFolders = addNewFolders(realm, paths, officialPaths)
+        deleteNotExistingFolders(realm, paths, officialPaths)
         return newFolders
     }
 
@@ -73,23 +78,36 @@ class Memebase {
      *
      * @param realm
      * @param devicePaths list of paths on device that contain photos.
+     * @param officialPaths list of official paths that are almost guaranteed to contain photos
      *
      * @return new folders. This can be used to ask user whether to sync those new folders.
      */
-    private fun addNewFolders(realm: Realm, devicePaths: List<String>): List<MemeFolder> {
+    private fun addNewFolders(
+        realm: Realm,
+        devicePaths: List<String>,
+        officialPaths: List<String>
+    ): List<MemeFolder> {
         val newFound: MutableList<MemeFolder> = mutableListOf()
         realm.executeTransaction { realm ->
-            for (path in devicePaths) {
-                val count = realm.where(MemeFolder::class.java)
-                    .equalTo(MemeFolder.FOLDER_PATH, path).findAll()
-                    .count()
+            val onlyOfficials = devicePaths.isEmpty()
+            for (path in if (onlyOfficials) officialPaths else devicePaths) {
+                val folderFound = realm.where(MemeFolder::class.java)
+                    .equalTo(MemeFolder.FOLDER_PATH, path).findFirst()
 
-                if (count == 0) {
+                if (folderFound == null) {
                     val folder = MemeFolder()
                     folder.folderPath = path
+                    folder.isOfficial =
+                        if (onlyOfficials) true
+                        else officialPaths.contains(path)
                     realm.copyToRealm(folder)
 
                     newFound.add(folder)
+                } else {
+                    // If it was found, just check if it's official
+                    folderFound.isOfficial =
+                        if (onlyOfficials) true
+                        else officialPaths.contains(path)
                 }
             }
         }
@@ -103,11 +121,22 @@ class Memebase {
      * @param realm
      * @param devicePaths list of paths on device that contain photos.
      */
-    private fun deleteNotExistingFolders(realm: Realm, devicePaths: List<String>) {
+    private fun deleteNotExistingFolders(
+        realm: Realm,
+        devicePaths: List<String>,
+        officialPaths: List<String>
+    ) {
         realm.executeTransaction { realm ->
-            val result =
+            val onlyOfficials = devicePaths.isEmpty()
+
+            val result = if (onlyOfficials)
+                realm.where(MemeFolder::class.java)
+                    .equalTo(MemeFolder.IS_OFFICIAL, true)
+                    .not().`in`(MemeFolder.FOLDER_PATH, officialPaths.toTypedArray()).findAll()
+            else
                 realm.where(MemeFolder::class.java)
                     .not().`in`(MemeFolder.FOLDER_PATH, devicePaths.toTypedArray()).findAll()
+
             if (result.count() > 0) {
                 Log.i(
                     TAG,
@@ -222,12 +251,15 @@ class Memebase {
      *
      * @param realm [Realm]
      * @param ctx [Context]
-     * @param finished
+     * @param syncFoldersIndex [Boolean] whether to sync folders index or not
+     * @param syncUnofficialFoldersIndex [Boolean] whether to include unofficial
+     *        folders in folders index sync
      */
     fun syncAllFolders(
         realm: Realm,
         ctx: Context,
-        syncFoldersIndex: Boolean = true
+        syncFoldersIndex: Boolean = true,
+        syncUnofficialFoldersIndex: Boolean = true
     ): List<MemeFolder> {
         if (!PainKiller().hasStoragePermission(ctx)) {
             Log.w(TAG, "Can't sync: no storage permission!")
@@ -235,10 +267,14 @@ class Memebase {
         }
 
         val trace =
-            if (syncFoldersIndex)
-                FirebasePerformance.startTrace("memebase_sync_all_folders_with_index")
-            else
+            if (syncFoldersIndex) {
+                if (syncUnofficialFoldersIndex)
+                    FirebasePerformance.startTrace("memebase_sync_all_folders_with_unofficial_index")
+                else
+                    FirebasePerformance.startTrace("memebase_sync_all_folders_with_index")
+            } else {
                 FirebasePerformance.startTrace("memebase_sync_all_folders_without_index")
+            }
         trace.start()
 
         isSyncing = true
@@ -247,9 +283,21 @@ class Memebase {
 
 
         if (syncFoldersIndex) {
-            val foldersList = PainKiller().getAllFoldersWithImages(ctx)
-                .map(File::getAbsolutePath)
-            newFolders = syncFoldersIndex(realm, foldersList)
+            newFolders = if (syncUnofficialFoldersIndex) {
+                val foldersList = PainKiller().getAllFoldersWithImages(ctx)
+                    .map(File::getAbsolutePath)
+                syncFoldersIndex(
+                    realm,
+                    foldersList,
+                    PainKiller().getOfficialFoldersWithImages().map(File::getAbsolutePath)
+                )
+            } else {
+                syncFoldersIndex(
+                    realm,
+                    emptyList(),
+                    PainKiller().getOfficialFoldersWithImages().map(File::getAbsolutePath)
+                )
+            }
         }
 
         val foldersToSync = realm.where(MemeFolder::class.java)

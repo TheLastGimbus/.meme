@@ -29,6 +29,42 @@ class PainKiller {
 
 
     /**
+     * @return official folders that are almost guaranteed to contain images,
+     * but they aren't everything
+     */
+    // Don't even ask me why this function is so full of try-catch'es
+    fun getOfficialFoldersWithImages(): List<File> {
+        val officialFoldersList = mutableListOf<File>()
+        val typesToAdd = mutableListOf<String>()
+        try {
+            typesToAdd.add(Environment.DIRECTORY_PICTURES)
+            typesToAdd.add(Environment.DIRECTORY_DOWNLOADS)
+            typesToAdd.add("Screenshots") // Screenshots are retarded, need to type them manually
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        for (type in typesToAdd) {
+            try {
+                officialFoldersList.add(Environment.getExternalStoragePublicDirectory(type))
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        try {
+            officialFoldersList.addAll(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                    .listFiles { dir, _ -> dir.isDirectory }
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        Log.i(TAG, "Official dirs: ${officialFoldersList.toTypedArray().contentDeepToString()}")
+        return officialFoldersList.toList()
+    }
+
+    /**
      * Requires READ_EXTERNAL_STORAGE permission.
      *
      * @return all folders with images found on device.
