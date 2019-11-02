@@ -12,9 +12,39 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/linearLayout_folders"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/textView_officials"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_folders_fragment_main_folders_title"
+                android:textColor="@color/colorPrimary"
+                android:textSize="24sp" />
+
+            <LinearLayout
+                android:id="@+id/linearLayout_folders_official"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/textView_unofficials"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_folders_fragment_other_folders_title"
+                android:textColor="@color/colorPrimary"
+                android:textSize="24sp" />
+
+            <LinearLayout
+                android:id="@+id/linearLayout_folders_unofficial"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" />
+        </LinearLayout>
     </ScrollView>
+
 </FrameLayout>

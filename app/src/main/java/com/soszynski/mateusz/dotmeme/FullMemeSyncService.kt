@@ -53,7 +53,11 @@ class FullMemeSyncService : Service() {
             val memebase = Memebase()
 
             Log.i(TAG, "Syncing all folders...")
-            val newFolders = memebase.syncAllFolders(realm, this@FullMemeSyncService)
+            val newFolders = memebase.syncAllFolders(
+                realm,
+                this@FullMemeSyncService,
+                syncUnofficialFoldersIndex = false
+            )
 
             if (newFolders.count() > 0 &&
                 prefs.getBoolean(

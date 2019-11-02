@@ -27,4 +27,6 @@
     <string name="wait">Zaczekaj chwilke</string>
     <string name="this_wont_take_long">To nie potrwa długo</string>
     <string name="navigation_drawer_item_force_sync">Zeskanuj ręcznie memy</string>
+    <string name="settings_folders_fragment_main_folders_title">Główne foldery:</string>
+    <string name="settings_folders_fragment_other_folders_title">Inne foldery:</string>
 </resources>

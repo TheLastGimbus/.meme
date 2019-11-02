@@ -2,7 +2,6 @@ package com.soszynski.mateusz.dotmeme
 
 import android.app.AlertDialog
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -137,16 +136,18 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
     }
 
     private fun loadSwitches(ctx: Context) {
-        mainView.linearLayout_folders.removeAllViews()
+        mainView.linearLayout_folders_official.removeAllViews()
         val memeFolders = realm.where(MemeFolder::class.java).findAll()
 
         for (folder in memeFolders) {
             val linLay = getSwitchView(ctx, folder)
-            linLay.setPadding(25, 25, 25, 25)
-            mainView.linearLayout_folders.addView(linLay)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            mainView.linearLayout_folders.setPaddingRelative(20, 20, 20, 20)
+            linLay.setPadding(0, 25, 0, 25)
+            if (folder.isOfficial) {
+                mainView.linearLayout_folders_official.addView(linLay)
+            } else {
+                mainView.linearLayout_folders_unofficial.addView(linLay)
+            }
+
         }
     }
 
