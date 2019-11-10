@@ -91,7 +91,7 @@ class PainKiller {
 
     fun getAllFoldersWithImagesOrVideos(ctx: Context, includeHidden: Boolean = false): List<File> {
         val trace = FirebasePerformance.getInstance()
-            .newTrace("painkiller_get_all_folders_with_images")
+            .newTrace("painkiller_get_all_folders_with_images_or_videos")
         trace.start()
         val dirs =
             (searchForPhotoOrVideoDirs(
@@ -219,11 +219,11 @@ class PainKiller {
                 continue
             }
             if (file.isDirectory) {
-                dirs.addAll(searchForPhotoDirs(ctx, file, includeHidden)) // recursion
+                dirs.addAll(searchForPhotoOrVideoDirs(ctx, file, includeHidden)) // recursion
             } else if (
                 file.isFile &&
                 !dirs.contains(path) &&
-                (isFileVideo(file) || isFileImage(file)) &&
+                (isFileImage(file) || isFileVideo(file)) &&
                 (includeHidden || !File(file.parent, ".nomedia").exists())
             ) {
                 dirs.add(path)
