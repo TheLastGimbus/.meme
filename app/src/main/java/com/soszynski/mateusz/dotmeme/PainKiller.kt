@@ -25,6 +25,7 @@ class PainKiller {
     companion object {
         const val TAG = "PAINKILLER"
         val imageFileExtensions = listOf("jpg", "png", "jpeg", "jpe", "bmp")
+        val videoFileExtensions = listOf("mp4", "avi", "mov")
     }
 
 
@@ -69,6 +70,7 @@ class PainKiller {
      *
      * @return all folders with images found on device.
      */
+    @Deprecated("Use getAllFoldersWithImagesOrVideos")
     fun getAllFoldersWithImages(ctx: Context, includeHidden: Boolean = false): List<File> {
         val trace = FirebasePerformance.getInstance()
             .newTrace("painkiller_get_all_folders_with_images")
@@ -81,6 +83,31 @@ class PainKiller {
             prettyDirs += dir.absolutePath + "\n"
         }
         Log.i(TAG, "All folders with photos: \n$prettyDirs")
+
+        trace.stop()
+
+        return dirs.toList()
+    }
+
+    fun getAllFoldersWithImagesOrVideos(ctx: Context, includeHidden: Boolean = false): List<File> {
+        val trace = FirebasePerformance.getInstance()
+            .newTrace("painkiller_get_all_folders_with_images")
+        trace.start()
+        val dirs =
+            (searchForPhotoOrVideoDirs(
+                ctx,
+                Environment.getExternalStorageDirectory(),
+                includeHidden
+            ) + searchForPhotoOrVideoDirs(
+                ctx,
+                File("/storage"),
+                includeHidden
+            )).distinct()
+        var prettyDirs = ""
+        for (dir in dirs) {
+            prettyDirs += dir.absolutePath + "\n"
+        }
+        Log.i(TAG, "All folders with photos or videos: \n$prettyDirs")
 
         trace.stop()
 
@@ -106,11 +133,44 @@ class PainKiller {
         }.toList()
     }
 
+    fun getAllVideosInFolder(folder: File): List<File> {
+        if (!folder.isDirectory) {
+            return emptyList()
+        }
+
+        return folder.listFiles { file ->
+            // Idk, is it 1024 or 1000, but let's just keep it 1024
+            return@listFiles (
+                    file.isFile &&
+                            isFileVideo(file) &&
+                            file.canRead() &&
+                            (file.length() / 1024) > 4
+                    )
+        }.toList()
+    }
+
+    fun getAllImagesOrVideosInFolder(folder: File): List<File> {
+        if (!folder.isDirectory) {
+            return emptyList()
+        }
+
+        return folder.listFiles { file ->
+            // Idk, is it 1024 or 1000, but let's just keep it 1024
+            return@listFiles (
+                    file.isFile &&
+                            (isFileImage(file) || isFileVideo(file)) &&
+                            file.canRead() &&
+                            (file.length() / 1024) > 4
+                    )
+        }.toList()
+    }
+
     /**
      * Recursively searching for folders containing images.
      *
      * @return list of found folders.
      */
+    @Deprecated("Use searchForPhotoOrVideoDirs")
     private fun searchForPhotoDirs(
         ctx: Context,
         path: File,
@@ -142,8 +202,43 @@ class PainKiller {
         return dirs.toList()
     }
 
+    private fun searchForPhotoOrVideoDirs(
+        ctx: Context,
+        path: File,
+        includeHidden: Boolean = false
+    ): List<File> {
+        val dirs = mutableListOf<File>()
+
+        val childrenPaths = path.listFiles()
+        if (childrenPaths.isNullOrEmpty()) {
+            return dirs.toList()
+        }
+
+        for (file in childrenPaths) {
+            if (file.isHidden && !includeHidden) {
+                continue
+            }
+            if (file.isDirectory) {
+                dirs.addAll(searchForPhotoDirs(ctx, file, includeHidden)) // recursion
+            } else if (
+                file.isFile &&
+                !dirs.contains(path) &&
+                (isFileVideo(file) || isFileImage(file)) &&
+                (includeHidden || !File(file.parent, ".nomedia").exists())
+            ) {
+                dirs.add(path)
+            }
+        }
+
+        return dirs.toList()
+    }
+
     private fun isFileImage(file: File): Boolean {
         return imageFileExtensions.contains(file.extension)
+    }
+
+    private fun isFileVideo(file: File): Boolean {
+        return videoFileExtensions.contains(file.extension)
     }
 
 
