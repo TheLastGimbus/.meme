@@ -3,6 +3,7 @@ package com.soszynski.mateusz.dotmeme
 import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -137,6 +138,7 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
 
     private fun loadSwitches(ctx: Context) {
         mainView.linearLayout_folders_official.removeAllViews()
+        mainView.linearLayout_folders_unofficial.removeAllViews()
         val memeFolders = realm.where(MemeFolder::class.java).findAll()
 
         for (folder in memeFolders) {
