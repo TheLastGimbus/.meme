@@ -1,17 +1,23 @@
 package com.soszynski.mateusz.dotmeme
 
 import android.util.Log
-import androidx.room.migration.Migration
 import io.realm.DynamicRealm
 import io.realm.RealmMigration
 
+class UniversalMigration : RealmMigration {
+    companion object {
+        const val TAG = "UniversalMigration"
+    }
 
-class RollMigration : RealmMigration {
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
-        Log.i(TAG, "Roll migration running, old version: $oldVersion, new version: $newVersion")
+        Log.i(
+            TAG,
+            "Universal migration running, " +
+                    "old version: $oldVersion, new version: $newVersion"
+        )
         val schema = realm.schema
 
-        if (oldVersion.toInt() == 0) {
+        if (oldVersion < 1) {
             val objSchema = schema.createWithPrimaryKeyField(
                 "MemeRoll",
                 MemeRoll.ID,
@@ -20,38 +26,9 @@ class RollMigration : RealmMigration {
             objSchema.setRequired(MemeRoll.ID, true)
             objSchema.addRealmListField(MemeRoll.ROLL, String::class.java)
         }
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return other is Migration
-    }
-
-    override fun hashCode(): Int {
-        return javaClass.hashCode()
-    }
-
-
-    companion object {
-        const val TAG = "Realm RollMigration"
-    }
-
-}
-
-class OfficialFoldersMigration : RealmMigration {
-    companion object {
-        const val TAG = "OfficialFoldersMig"
-    }
-
-    override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
-        Log.i(
-            TAG, "OfficialFolders migration running, " +
-                    "old version: $oldVersion, new version: $newVersion"
-        )
-        val schema = realm.schema
         if (oldVersion < 2) {
             val folderSchema = schema.get("MemeFolder")!!
             folderSchema.addField(MemeFolder.IS_OFFICIAL, Boolean::class.java)
         }
     }
-
 }

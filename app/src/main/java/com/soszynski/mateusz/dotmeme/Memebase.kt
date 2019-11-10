@@ -31,14 +31,14 @@ class Memebase {
             if (Realm.getDefaultConfiguration()?.schemaVersion!! < 1) {
                 val config = RealmConfiguration.Builder()
                     .schemaVersion(1)
-                    .migration(RollMigration())
+                    .migration(UniversalMigration())
                     .build()
                 Realm.setDefaultConfiguration(config)
             }
             if (Realm.getDefaultConfiguration()?.schemaVersion!! < 2) {
                 val config = RealmConfiguration.Builder()
                     .schemaVersion(2)
-                    .migration(OfficialFoldersMigration())
+                    .migration(UniversalMigration())
                     .build()
                 Realm.setDefaultConfiguration(config)
             }
