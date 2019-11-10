@@ -48,7 +48,7 @@ class FullSyncWorker(private val ctx: Context, workerParams: WorkerParameters) :
         Memebase.handleRealmConfigs()
         val realm = Realm.getDefaultInstance()
         val memebase = Memebase()
-        val newFolders = memebase.syncAllFolders(realm, ctx)
+        val newFolders = memebase.syncAllFolders(realm, ctx, syncUnofficialFoldersIndex = true)
 
         if (newFolders.count() > 0 &&
             prefs.getBoolean(
