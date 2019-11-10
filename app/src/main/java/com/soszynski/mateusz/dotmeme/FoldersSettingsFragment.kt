@@ -33,6 +33,9 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
         text.text = File(folder.folderPath).name
         text.textSize = 16f
         text.setTextColor(ContextCompat.getColor(ctx, R.color.fontDefault))
+        text.isSingleLine = true
+        text.ellipsize = TextUtils.TruncateAt.MIDDLE
+        // TODO: Fix long text covering switch
 
         val sw = Switch(ctx)
         sw.isChecked = folder.isScannable
