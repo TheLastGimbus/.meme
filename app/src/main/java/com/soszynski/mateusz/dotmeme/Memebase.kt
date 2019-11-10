@@ -42,6 +42,13 @@ class Memebase {
                     .build()
                 Realm.setDefaultConfiguration(config)
             }
+            if (Realm.getDefaultConfiguration()?.schemaVersion!! < 3) {
+                val config = RealmConfiguration.Builder()
+                    .schemaVersion(3)
+                    .migration(UniversalMigration())
+                    .build()
+                Realm.setDefaultConfiguration(config)
+            }
         }
     }
 

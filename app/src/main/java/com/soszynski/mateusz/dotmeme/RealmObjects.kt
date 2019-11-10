@@ -36,6 +36,16 @@ open class Meme : RealmObject() {
     }
 }
 
+open class MemeVideo : RealmObject() {
+    @PrimaryKey
+    @Required
+    var filePath: String = ""
+
+    companion object {
+        const val FILE_PATH = "filePath"
+    }
+}
+
 /**
  * [RealmObject] class containing one folder with images - or memes.
  *
@@ -53,6 +63,7 @@ open class MemeFolder : RealmObject() {
     var sdCard: Boolean = false
     var isOfficial = false
     var memes: RealmList<Meme> = RealmList()
+    var videos: RealmList<MemeVideo> = RealmList()
 
     companion object {
         const val FOLDER_PATH = "folderPath"
@@ -60,6 +71,7 @@ open class MemeFolder : RealmObject() {
         const val SD_CARD = "sdCard"
         const val IS_OFFICIAL = "isOfficial"
         const val MEMES = "memes"
+        const val VIDEOS = "videos"
 
         /**
          * Companion function to check if all [Meme]s inside given [MemeFolder] are scanned.
