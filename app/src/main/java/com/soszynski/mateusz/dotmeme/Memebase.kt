@@ -42,6 +42,13 @@ class Memebase {
                     .build()
                 Realm.setDefaultConfiguration(config)
             }
+            if (Realm.getDefaultConfiguration()?.schemaVersion!! < 3) {
+                val config = RealmConfiguration.Builder()
+                    .schemaVersion(3)
+                    .migration(UniversalMigration())
+                    .build()
+                Realm.setDefaultConfiguration(config)
+            }
         }
     }
 
@@ -162,20 +169,24 @@ class Memebase {
     private fun syncFolder(
         realm: Realm,
         folder: MemeFolder
-    ): List<Meme> {
+    ): Pair<List<Meme>, List<MemeVideo>> {
         val trace = FirebasePerformance.getInstance().newTrace("memebase_sync_folder")
         trace.start()
 
         val imagesInFolderList = PainKiller().getAllImagesInFolder(File(folder.folderPath))
+        val videosInFolderList = PainKiller().getAllVideosInFolder(File(folder.folderPath))
 
         deleteNotExistingMemesFromFolder(realm, folder, imagesInFolderList)
         val newMemes = addNewMemesToFolder(realm, folder, imagesInFolderList)
+
+        deleteNotExistingVideosFromFolder(realm, folder, videosInFolderList)
+        val newVideos = addNewVideosToFolder(realm, folder, videosInFolderList)
 
         trace.putMetric("folder_images_count", folder.memes.count().toLong())
         trace.putMetric("folder_new_memes", newMemes.count().toLong())
         trace.stop()
 
-        return newMemes
+        return Pair(newMemes, newVideos)
     }
 
     /**
@@ -230,13 +241,77 @@ class Memebase {
         folder: MemeFolder,
         filesList: List<File> // for better optimization
     ) {
-
         realm.executeTransaction { realm ->
             val result =
                 folder.memes.where()
                     .not()
                     .`in`(
                         Meme.FILE_PATH,
+                        filesList.map(File::getAbsolutePath).toTypedArray()
+                    )
+                    .findAll()
+
+            result.deleteAllFromRealm()
+        }
+    }
+
+    /**
+     * Adds new [MemeVideo]s found on device to given [MemeFolder]
+     *
+     * This function takes long.
+     * You need to handle async yourself.
+     *
+     * @param realm
+     * @param folder [MemeFolder] where new memes will be added.
+     * @param filesList list of image files inside [folder]. It is separate for better optimization,
+     *        since getting list of 5000 images from folder can take some time.
+     * @return new [MemeVideo]s that were added to database index.
+     */
+    private fun addNewVideosToFolder(
+        realm: Realm,
+        folder: MemeFolder,
+        filesList: List<File> // for better optimization
+    ): List<MemeVideo> {
+        val newMemes = mutableListOf<MemeVideo>()
+
+        realm.executeTransaction { realm ->
+            for (video in filesList) {
+                // If Meme with certain path doesn't exist yet
+                if (folder.videos.where().equalTo(
+                        MemeVideo.FILE_PATH,
+                        video.absolutePath
+                    ).findAll().count() == 0
+                ) {
+                    val memeVideo = MemeVideo()
+                    memeVideo.filePath = video.absolutePath
+                    folder.videos.add(memeVideo)
+                    newMemes.add(memeVideo)
+                }
+            }
+        }
+        return newMemes
+    }
+
+    /**
+     * Deletes [MemeVideo]s from database that weren't found on device.
+     *
+     * You need to handle async yourself.
+     *
+     * @param realm
+     * @param folder [MemeFolder] where memes will be deleted.
+     * @param filesList list of image files inside [folder]. It is separate for better optimization.
+     */
+    private fun deleteNotExistingVideosFromFolder(
+        realm: Realm,
+        folder: MemeFolder,
+        filesList: List<File> // for better optimization
+    ) {
+        realm.executeTransaction { realm ->
+            val result =
+                folder.videos.where()
+                    .not()
+                    .`in`(
+                        MemeVideo.FILE_PATH,
                         filesList.map(File::getAbsolutePath).toTypedArray()
                     )
                     .findAll()
@@ -286,7 +361,7 @@ class Memebase {
 
         if (syncFoldersIndex) {
             newFolders = if (syncUnofficialFoldersIndex) {
-                val foldersList = PainKiller().getAllFoldersWithImages(ctx)
+                val foldersList = PainKiller().getAllFoldersWithImagesOrVideos(ctx)
                     .map(File::getAbsolutePath)
                 syncFoldersIndex(
                     realm,

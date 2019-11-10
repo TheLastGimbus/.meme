@@ -30,5 +30,16 @@ class UniversalMigration : RealmMigration {
             val folderSchema = schema.get("MemeFolder")!!
             folderSchema.addField(MemeFolder.IS_OFFICIAL, Boolean::class.java)
         }
+        if (oldVersion < 3) {
+            val videoSchema = schema.createWithPrimaryKeyField(
+                "MemeVideo",
+                MemeVideo.FILE_PATH,
+                String::class.java
+            )
+            videoSchema.setRequired(MemeVideo.FILE_PATH, true)
+
+            val folderSchema = schema.get("MemeFolder")!!
+            folderSchema.addRealmListField(MemeFolder.VIDEOS, videoSchema)
+        }
     }
 }
