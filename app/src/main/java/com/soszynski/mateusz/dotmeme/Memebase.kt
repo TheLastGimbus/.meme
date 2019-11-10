@@ -237,7 +237,6 @@ class Memebase {
         folder: MemeFolder,
         filesList: List<File> // for better optimization
     ) {
-
         realm.executeTransaction { realm ->
             val result =
                 folder.memes.where()
@@ -293,7 +292,7 @@ class Memebase {
 
         if (syncFoldersIndex) {
             newFolders = if (syncUnofficialFoldersIndex) {
-                val foldersList = PainKiller().getAllFoldersWithImages(ctx)
+                val foldersList = PainKiller().getAllFoldersWithImagesOrVideos(ctx)
                     .map(File::getAbsolutePath)
                 syncFoldersIndex(
                     realm,
