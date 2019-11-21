@@ -16,8 +16,8 @@ android {
         applicationId "com.soszynski.mateusz.dotmeme"
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode 12
-        versionName "1.4.6"
+        versionCode 13
+        versionName "1.4.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
