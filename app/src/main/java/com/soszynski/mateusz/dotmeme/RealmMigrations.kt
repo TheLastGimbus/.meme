@@ -45,6 +45,8 @@ class UniversalMigration : RealmMigration {
         if (oldVersion < 4) {
             val folderSchema = schema.get("MemeFolder")!!
             folderSchema.addField(MemeFolder.LAST_SYNC, Date::class.java)
+            // I don't know why is this required. It isn't. But it is. So... okay?
+            folderSchema.setRequired(MemeFolder.LAST_SYNC, true)
         }
     }
 }
