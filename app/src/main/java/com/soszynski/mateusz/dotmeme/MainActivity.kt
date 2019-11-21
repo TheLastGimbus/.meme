@@ -376,6 +376,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Thanks to improvement with lastSync solution, we can do this super-often,
+        // because it pretty much won't do anything if there was no change in folder.
+        syncAndUpdateRoll()
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == INTRO_ACTIVITY_REQUEST_CODE) {

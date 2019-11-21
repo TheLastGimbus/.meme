@@ -392,7 +392,11 @@ class Memebase {
             .equalTo(MemeFolder.IS_SCANNABLE, true).findAll()
             // Only folders that have changed after last sync will be synced again.
             // This will skyrocket sync speed if user has some big-ass folder that is changed rarely
-            .filter { Date(File(it.folderPath).lastModified()).after(it.lastSync) }
+            .filter {
+                Date(File(it.folderPath).lastModified())
+                    .after(it.lastSync)
+            }
+        trace.putMetric("folders_to_sync", foldersToSync.count().toLong())
 
         syncAllFoldersRecursive(realm, foldersToSync)
 
