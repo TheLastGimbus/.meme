@@ -3,6 +3,7 @@ package com.soszynski.mateusz.dotmeme
 import android.util.Log
 import io.realm.DynamicRealm
 import io.realm.RealmMigration
+import java.util.*
 
 class UniversalMigration : RealmMigration {
     companion object {
@@ -40,6 +41,10 @@ class UniversalMigration : RealmMigration {
 
             val folderSchema = schema.get("MemeFolder")!!
             folderSchema.addRealmListField(MemeFolder.VIDEOS, videoSchema)
+        }
+        if (oldVersion < 4) {
+            val folderSchema = schema.get("MemeFolder")!!
+            folderSchema.addField(MemeFolder.LAST_SYNC, Date::class.java)
         }
     }
 }

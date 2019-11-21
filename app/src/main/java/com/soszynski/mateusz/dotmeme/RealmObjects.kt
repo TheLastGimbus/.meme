@@ -6,6 +6,7 @@ import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 import io.realm.annotations.Required
 import java.io.File
+import java.util.*
 
 /**
  * [RealmObject] class containing one meme.
@@ -60,6 +61,7 @@ open class MemeFolder : RealmObject() {
     var folderPath: String = ""
 
     var isScannable: Boolean = false
+    var lastSync: Date = Date(0)
     var sdCard: Boolean = false
     var isOfficial = false
     var memes: RealmList<Meme> = RealmList()
@@ -68,6 +70,7 @@ open class MemeFolder : RealmObject() {
     companion object {
         const val FOLDER_PATH = "folderPath"
         const val IS_SCANNABLE = "isScannable"
+        const val LAST_SYNC = "lastSync"
         const val SD_CARD = "sdCard"
         const val IS_OFFICIAL = "isOfficial"
         const val MEMES = "memes"

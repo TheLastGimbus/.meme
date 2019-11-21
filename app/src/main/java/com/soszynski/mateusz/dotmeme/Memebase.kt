@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.io.File
+import java.util.*
 
 
 /**
@@ -45,6 +46,13 @@ class Memebase {
             if (Realm.getDefaultConfiguration()?.schemaVersion!! < 3) {
                 val config = RealmConfiguration.Builder()
                     .schemaVersion(3)
+                    .migration(UniversalMigration())
+                    .build()
+                Realm.setDefaultConfiguration(config)
+            }
+            if (Realm.getDefaultConfiguration()?.schemaVersion!! < 4) {
+                val config = RealmConfiguration.Builder()
+                    .schemaVersion(4)
                     .migration(UniversalMigration())
                     .build()
                 Realm.setDefaultConfiguration(config)
@@ -172,6 +180,9 @@ class Memebase {
     ): Pair<List<Meme>, List<MemeVideo>> {
         val trace = FirebasePerformance.getInstance().newTrace("memebase_sync_folder")
         trace.start()
+        realm.executeTransaction {
+            folder.lastSync = Calendar.getInstance().time
+        }
 
         val imagesInFolderList = PainKiller().getAllImagesInFolder(File(folder.folderPath))
         val videosInFolderList = PainKiller().getAllVideosInFolder(File(folder.folderPath))
@@ -379,6 +390,10 @@ class Memebase {
 
         val foldersToSync = realm.where(MemeFolder::class.java)
             .equalTo(MemeFolder.IS_SCANNABLE, true).findAll()
+            // Only folders that have changed after last sync will be synced again.
+            // This will skyrocket sync speed if user has some big-ass folder that is changed rarely
+            .filter { Date(File(it.folderPath).lastModified()).after(it.lastSync) }
+
         syncAllFoldersRecursive(realm, foldersToSync)
 
         cacheRoll(realm)
