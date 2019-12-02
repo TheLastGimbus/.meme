@@ -33,4 +33,5 @@
     <string name="prefs_category_main">Główne</string>
     <string name="prefs_watermark_des">Dodaj znak wodny \"znaleziono z .meme\" kiedy udostępniasz mema</string>
     <string name="prefs_watermark_title">Dodawaj znak wodny</string>
+    <string name="watermark_text">Znaleziono z .meme</string>
 </resources>

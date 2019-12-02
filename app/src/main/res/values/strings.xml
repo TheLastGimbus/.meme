@@ -32,4 +32,5 @@
     <string name="prefs_category_main">Main</string>
     <string name="prefs_watermark_des">Add watermark \"found with .meme\" to meme when you share it</string>
     <string name="prefs_watermark_title">Add watermark</string>
+    <string name="watermark_text">Found with .meme</string>
 </resources>
