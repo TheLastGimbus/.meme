@@ -160,7 +160,7 @@ class BigImageActivity : AppCompatActivity() {
                     bitmap
                 )
                     .loadWatermarkText(
-                        WatermarkText("Found with .meme")
+                        WatermarkText(getString(R.string.watermark_text))
                             .setTextAlpha(175)
                             .setPositionY(0.85)
                             .setTextSize(10.0)
