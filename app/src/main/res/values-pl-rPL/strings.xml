@@ -34,4 +34,5 @@
     <string name="prefs_watermark_des">Dodaj znak wodny \"znaleziono z .meme\" kiedy udostępniasz mema</string>
     <string name="prefs_watermark_title">Dodawaj znak wodny</string>
     <string name="watermark_text">Znaleziono z .meme</string>
+    <string name="share_meme">Wyślij meme</string>
 </resources>

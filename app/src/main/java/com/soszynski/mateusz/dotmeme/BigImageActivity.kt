@@ -184,7 +184,7 @@ class BigImageActivity : AppCompatActivity() {
                 file
             )
             intent.putExtra(Intent.EXTRA_STREAM, uri)
-            startActivity(Intent.createChooser(intent, "Share meme"))
+            startActivity(Intent.createChooser(intent, getString(R.string.share_meme)))
         }
     }
 
