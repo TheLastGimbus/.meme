@@ -59,6 +59,8 @@ dependencies {
 
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 
+    implementation 'com.huangyz0918:androidwm-light:0.1.2'
+
     implementation 'com.github.AppIntro:AppIntro:5.1.0'
 
     implementation "androidx.work:work-runtime-ktx:2.2.0"

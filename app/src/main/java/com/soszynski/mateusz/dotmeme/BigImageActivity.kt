@@ -3,6 +3,8 @@ package com.soszynski.mateusz.dotmeme
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -14,8 +16,11 @@ import androidx.viewpager.widget.ViewPager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.github.chrisbanes.photoview.PhotoView
+import com.watermark.androidwm_light.WatermarkBuilder
+import com.watermark.androidwm_light.bean.WatermarkText
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_big_image.*
+import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 
 
@@ -143,7 +148,34 @@ class BigImageActivity : AppCompatActivity() {
 
 
         button_share.setOnClickListener {
-            val file = File(memesPathsArray[viewPager.currentItem])
+            val file = if (defaultSharedPreferences.getBoolean(
+                    Prefs.Keys.ADD_WATERMARK,
+                    Prefs.Defaults.ADD_WATERMARK
+                )
+            ) {
+                val tmpDir = PainKiller().clearTemporary(this)
+                val bitmap = BitmapFactory.decodeFile(memesPathsArray[viewPager.currentItem])
+                WatermarkBuilder.create(
+                    this,
+                    bitmap
+                )
+                    .loadWatermarkText(
+                        WatermarkText("Found with .meme")
+                            .setTextAlpha(175)
+                            .setPositionY(0.85)
+                            .setTextSize(10.0)
+                            .setBackgroundColor(Color.WHITE)
+                            .setTextColor(Color.BLACK)
+                    )
+                    .watermark
+                    .saveToLocalPng(tmpDir.resolve("img").absolutePath)
+
+                PainKiller().getTemporaryFirstFile(this)!!
+
+            } else {
+                File(memesPathsArray[viewPager.currentItem])
+            }
+
             val intent = Intent(Intent.ACTION_SEND)
             intent.type = "image/${file.extension}"
             val uri = FileProvider.getUriForFile(

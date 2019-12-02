@@ -282,4 +282,25 @@ class PainKiller {
         }
         return false
     }
+
+    /**
+     * @return first (and hopefully only) file in tmp/ folder
+     */
+    fun getTemporaryFirstFile(ctx: Context): File? {
+        return ctx.filesDir.resolve("tmp/").listFiles()?.first()
+    }
+
+    /**
+     * Removes all files from tmp/ dir or creates it if it doesn't exits.
+     * Should be run before using tmp/ in both cases.
+     *
+     * @param ctx [Context]
+     * @return Temporary folder dir
+     */
+    fun clearTemporary(ctx: Context): File {
+        val tmp = ctx.filesDir.resolve("tmp/")
+        tmp.mkdirs()
+        tmp.listFiles()?.forEach { it.deleteRecursively() }
+        return tmp
+    }
 }
