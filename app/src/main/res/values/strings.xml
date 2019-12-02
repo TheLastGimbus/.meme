@@ -30,4 +30,6 @@
     <string name="settings_folders_fragment_other_folders_title">Other folders:</string>
     <string name="prefs_folders_settings_title">Folders settings</string>
     <string name="prefs_category_main">Main</string>
+    <string name="prefs_watermark_des">Add watermark \"found with .meme\" to meme when you share it</string>
+    <string name="prefs_watermark_title">Add watermark</string>
 </resources>

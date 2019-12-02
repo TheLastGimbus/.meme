@@ -8,9 +8,10 @@
         </PreferenceScreen>
 
         <SwitchPreference
-            android:defaultValue="false"
-            android:summary="@string/prefs_watermark_des"
-            android:title="@string/prefs_watermark_title" />
+            app:defaultValue="false"
+            app:key="add_watermark_on_share"
+            app:summary="@string/prefs_watermark_des"
+            app:title="@string/prefs_watermark_title" />
 
     </PreferenceCategory>
 

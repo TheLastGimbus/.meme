@@ -31,4 +31,6 @@
     <string name="settings_folders_fragment_other_folders_title">Inne foldery:</string>
     <string name="prefs_folders_settings_title">Ustawienia folderów</string>
     <string name="prefs_category_main">Główne</string>
+    <string name="prefs_watermark_des">Dodaj znak wodny \"znaleziono z .meme\" kiedy udostępniasz mema</string>
+    <string name="prefs_watermark_title">Dodawaj znak wodny</string>
 </resources>
