@@ -29,4 +29,6 @@
     <string name="navigation_drawer_item_force_sync">Zeskanuj ręcznie memy</string>
     <string name="settings_folders_fragment_main_folders_title">Główne foldery:</string>
     <string name="settings_folders_fragment_other_folders_title">Inne foldery:</string>
+    <string name="prefs_folders_settings_title">Ustawienia folderów</string>
+    <string name="prefs_category_main">Główne</string>
 </resources>

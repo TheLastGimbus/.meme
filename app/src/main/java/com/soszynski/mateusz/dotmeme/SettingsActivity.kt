@@ -2,6 +2,7 @@ package com.soszynski.mateusz.dotmeme
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceFragmentCompat
 import kotlinx.android.synthetic.main.activity_settings.*
 
 class SettingsActivity : AppCompatActivity() {
@@ -9,10 +10,20 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
-        setSupportActionBar(activity_settings_toolbar)
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.settings, SettingsFragment())
+            .commit()
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        activity_settings_toolbar.setNavigationOnClickListener {
+        toolbar.setNavigationOnClickListener {
             onBackPressed()
+        }
+    }
+
+    class SettingsFragment : PreferenceFragmentCompat() {
+        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+            setPreferencesFromResource(R.xml.root_preferences, rootKey)
         }
     }
 }

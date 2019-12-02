@@ -3,29 +3,43 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.soszynski.mateusz.dotmeme">
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:name=".Dotmeme"
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher_icon"
         android:label="@string/app_name"
         android:largeHeap="true"
+        android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:requestLegacyExternalStorage="true"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".FoldersSettingsActivity">
+            <intent-filter>
+                <action android:name="com.soszynski.mateusz.dotmeme.FoldersSettingsActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.soszynski.mateusz.dotmeme.MainActivity" />
+        </activity>
         <activity
             android:name=".AboutActivity"
             android:configChanges="orientation|screenSize" />
         <activity
             android:name=".IntroActivity"
             android:configChanges="orientation|screenSize" />
-
         <activity android:name=".DevStuffActivity" />
-
         <activity
             android:name=".BigImageActivity"
             android:configChanges="orientation|screenSize" />
-
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize">
@@ -35,12 +49,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SettingsActivity" />
 
         <meta-data
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
             android:value="ocr" />
-
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
@@ -59,14 +71,10 @@
             android:name=".NewFolderFoundDecisionReceiver"
             android:enabled="true"
             android:exported="false" />
+
         <service
             android:name=".FullMemeSyncService"
             android:exported="false" />
     </application>
-
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 </manifest>

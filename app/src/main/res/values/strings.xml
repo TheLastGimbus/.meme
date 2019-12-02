@@ -28,4 +28,6 @@
     <string name="navigation_drawer_item_force_sync">Scan memes manually</string>
     <string name="settings_folders_fragment_main_folders_title">Main folders</string>
     <string name="settings_folders_fragment_other_folders_title">Other folders:</string>
+    <string name="prefs_folders_settings_title">Folders settings</string>
+    <string name="prefs_category_main">Main</string>
 </resources>
