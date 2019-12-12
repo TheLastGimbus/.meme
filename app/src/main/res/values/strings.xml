@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">.meme</string>
+    <string name="app_name">Dotmeme</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="navigation_drawer_item_send_feedback">Send feedback</string>
