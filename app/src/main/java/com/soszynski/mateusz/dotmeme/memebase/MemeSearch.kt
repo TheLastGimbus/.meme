@@ -13,7 +13,7 @@ class MemeSearch {
         val TAG = "MemeSearch"
 
         data class SearchOptions(
-            val folders: List<MemeFolder>,
+            val folders: List<String>,
             val images: Boolean = true,
             val videos: Boolean = false, // TODO
             val sortType: Int = SORT_NONE
@@ -36,7 +36,7 @@ class MemeSearch {
                 const val SORT_OLDEST_FIRST = 2
 
                 fun getDefault(realm: Realm) =
-                    SearchOptions(realm.where(MemeFolder::class.java).findAll())
+                    SearchOptions(realm.where(MemeFolder::class.java).findAll().map { it.folderPath })
             }
         }
     }
@@ -55,7 +55,7 @@ class MemeSearch {
         realm: Realm,
         query: String,
         options: SearchOptions = SearchOptions(
-            folders = realm.where(MemeFolder::class.java).findAll().toList()
+            folders = realm.where(MemeFolder::class.java).findAll().map { it.folderPath }
         )
     ): List<String> {
         if (options.videos) {
@@ -71,7 +71,10 @@ class MemeSearch {
 
         val keywords =
             StringUtils.stripAccents(query).split(" ".toRegex()).dropLastWhile { it.isEmpty() }
-        for (folder in options.folders) {
+        val folders = realm.where(MemeFolder::class.java)
+            .`in`(MemeFolder.FOLDER_PATH, options.folders.toTypedArray())
+            .findAll()
+        for (folder in folders) {
             if (query == "*") {
                 if (options.images)
                     memeList.addAll(folder.memes.map { Pair(0, it.filePath) })
@@ -113,7 +116,7 @@ class MemeSearch {
             .sortedWith(comparator)
             .map { return@map it.second }
 
-        trace.putMetric("memes_all_count", options.folders.sumBy { it.memes.count() }.toLong())
+        trace.putMetric("memes_all_count", folders.sumBy { it.memes.count() }.toLong())
         trace.putMetric("memes_found_count", memeList.count().toLong())
         trace.stop()
 
