@@ -7,6 +7,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.soszynski.mateusz.dotmeme.memebase.Memebase
 import com.soszynski.mateusz.dotmeme.services.FullMemeSyncService
 import io.realm.Realm
 import org.jetbrains.anko.defaultSharedPreferences

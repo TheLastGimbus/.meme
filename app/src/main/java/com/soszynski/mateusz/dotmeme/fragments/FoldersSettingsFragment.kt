@@ -14,6 +14,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.soszynski.mateusz.dotmeme.*
+import com.soszynski.mateusz.dotmeme.memebase.Memebase
 import io.realm.Realm
 import io.realm.RealmChangeListener
 import kotlinx.android.synthetic.main.fragment_folders_settings.view.*

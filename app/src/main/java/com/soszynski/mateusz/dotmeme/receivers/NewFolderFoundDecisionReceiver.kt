@@ -6,7 +6,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import com.soszynski.mateusz.dotmeme.MemeFolder
-import com.soszynski.mateusz.dotmeme.Memebase
+import com.soszynski.mateusz.dotmeme.memebase.Memebase
 import io.realm.Realm
 
 class NewFolderFoundDecisionReceiver : BroadcastReceiver() {

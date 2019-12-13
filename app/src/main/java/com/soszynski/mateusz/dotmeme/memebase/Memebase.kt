@@ -1,4 +1,4 @@
-package com.soszynski.mateusz.dotmeme
+package com.soszynski.mateusz.dotmeme.memebase
 
 import android.content.Context
 import android.graphics.BitmapFactory
@@ -7,6 +7,7 @@ import android.util.Log
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.perf.FirebasePerformance
+import com.soszynski.mateusz.dotmeme.*
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import org.apache.commons.lang3.StringUtils

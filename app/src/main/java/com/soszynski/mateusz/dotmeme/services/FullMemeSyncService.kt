@@ -9,7 +9,11 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
-import com.soszynski.mateusz.dotmeme.*
+import com.soszynski.mateusz.dotmeme.MemeFolder
+import com.soszynski.mateusz.dotmeme.Notifs
+import com.soszynski.mateusz.dotmeme.PainKiller
+import com.soszynski.mateusz.dotmeme.Prefs
+import com.soszynski.mateusz.dotmeme.memebase.Memebase
 import io.realm.Realm
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doAsync
