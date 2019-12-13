@@ -2,10 +2,10 @@ package com.soszynski.mateusz.dotmeme.memebase
 
 import android.util.Log
 import com.google.firebase.perf.FirebasePerformance
-import com.soszynski.mateusz.dotmeme.Meme
 import com.soszynski.mateusz.dotmeme.MemeFolder
 import io.realm.Realm
 import org.apache.commons.lang3.StringUtils
+import java.io.File
 
 
 class MemeSearch {
@@ -44,45 +44,73 @@ class MemeSearch {
      *
      * @param realm [Realm]
      * @param query text to search.
-     * @param folders [MemeFolder]s to scan. Default value is all of them.
+     * @param options [SearchOptions] to rule what and how to search
      *
-     * @return list of found [Meme]s
+     * @return list of found memes and videos in string paths
      */
     fun search(
         realm: Realm,
         query: String,
-        folders: List<MemeFolder> = realm.where(MemeFolder::class.java).findAll().toList()
-    ): List<Meme> {
+        options: SearchOptions = SearchOptions(
+            folders = realm.where(MemeFolder::class.java).findAll().toList()
+        )
+    ): List<String> {
+        if (options.videos) {
+            TODO("Videos are not yet implemented in most of the places")
+        }
+
         val trace = FirebasePerformance.getInstance().newTrace("memebase_search")
         trace.start()
 
-        val memeList = mutableListOf<Pair<Int, Meme>>()
+        val memeList = mutableListOf<Pair<Int, String>>()
 
         Log.i(TAG, "Begin of search, query: $query")
 
         val keywords =
             StringUtils.stripAccents(query).split(" ".toRegex()).dropLastWhile { it.isEmpty() }
-        for (folder in folders) {
-            for (meme in folder.memes) {
-                var pair = Pair(0, meme)
-                val strippedText = StringUtils.stripAccents(meme.rawText)
-                for (keyword in keywords) {
-                    if (strippedText.contains(keyword, true)) {
-                        pair = pair.copy(first = pair.first + 1)
+        for (folder in options.folders) {
+            if (query == "*") {
+                if (options.images)
+                    memeList.addAll(folder.memes.map { Pair(0, it.filePath) })
+                if (options.videos)
+                    memeList.addAll(folder.videos.map { Pair(0, it.filePath) })
+                continue
+            }
+            if (options.images) {
+                for (meme in folder.memes) {
+                    var pair = Pair(0, meme.filePath)
+                    val strippedText = StringUtils.stripAccents(meme.rawText)
+                    for (keyword in keywords) {
+                        if (strippedText.contains(keyword, true)) {
+                            pair = pair.copy(first = pair.first + 1)
+                        }
+                    }
+
+                    if (pair.first > 0) {
+                        memeList.add(pair)
                     }
                 }
-
-                if (pair.first > 0) {
-                    memeList.add(pair)
-                }
             }
+            // TODO: options.video
+        }
+
+        val comparator = when (options.sortType) {
+            SearchOptions.SORT_NONE -> compareBy { it.first }
+            SearchOptions.SORT_NEWEST_FIRST -> {
+                compareBy<Pair<Int, String>> { it.first }.thenByDescending { File(it.second).lastModified() }
+            }
+            SearchOptions.SORT_OLDEST_FIRST -> {
+                compareBy<Pair<Int, String>> { it.first }
+                    .thenBy { File(it.second).lastModified() }
+            }
+            else -> compareBy<Pair<Int, String>> { it.first }
         }
 
         val finalList = memeList
-            .sortedByDescending { it.first }
+            .sortedWith(comparator)
             .map { return@map it.second }
 
-        trace.putMetric("memes_all_count", folders.sumBy { it.memes.count() }.toLong())
+        trace.putMetric("memes_all_count", options.folders.sumBy { it.memes.count() }.toLong())
         trace.putMetric("memes_found_count", memeList.count().toLong())
         trace.stop()
 

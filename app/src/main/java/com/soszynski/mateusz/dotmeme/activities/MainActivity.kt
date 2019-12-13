@@ -354,8 +354,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     doAsync {
                         val realm = Realm.getInstance(config) // Thread migration
                         val finalList = MemeSearch()
-                            .search(realm, query)
-                            .map(Meme::filePath)
+                            .search(
+                                realm, query, MemeSearch.Companion.SearchOptions(
+                                    folders = realm.where(MemeFolder::class.java).findAll(),
+                                    images = true,
+                                    videos = false // TODO
+                                )
+                            )
                         uiThread {
                             gridView_meme_roll.adapter = ImageAdapter(finalList.map { File(it) })
                             progressBar_loading.visibility = ProgressBar.GONE
