@@ -113,6 +113,43 @@ class BigImageActivity : AppCompatActivity() {
         )
     }
 
+    private fun shareMeme(memeFile: File, watermark: Boolean = false) {
+
+        val file = if (watermark) {
+            val tmpDir = PainKiller().clearTemporary(this)
+            val bitmap = BitmapFactory.decodeFile(memeFile.absolutePath)
+            WatermarkBuilder.create(
+                this,
+                bitmap
+            )
+                .loadWatermarkText(
+                    WatermarkText(getString(R.string.watermark_text))
+                        .setTextAlpha(175)
+                        .setPositionY(0.85)
+                        .setTextSize(10.0)
+                        .setBackgroundColor(Color.WHITE)
+                        .setTextColor(Color.BLACK)
+                )
+                .watermark
+                .saveToLocalPng(tmpDir.resolve("img").absolutePath)
+
+            PainKiller().getTemporaryFirstFile(this)!!
+
+        } else {
+            memeFile
+        }
+
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.type = "image/${file.extension}"
+        val uri = FileProvider.getUriForFile(
+            this,
+            applicationContext.packageName + ".provider",
+            file
+        )
+        intent.putExtra(Intent.EXTRA_STREAM, uri)
+        startActivity(Intent.createChooser(intent, getString(R.string.share_meme)))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -148,43 +185,17 @@ class BigImageActivity : AppCompatActivity() {
 
 
         button_share.setOnClickListener {
-            val file = if (defaultSharedPreferences.getBoolean(
+            shareMeme(
+                File(memesPathsArray[viewPager.currentItem]),
+                defaultSharedPreferences.getBoolean(
                     Prefs.Keys.ADD_WATERMARK,
                     Prefs.Defaults.ADD_WATERMARK
                 )
-            ) {
-                val tmpDir = PainKiller().clearTemporary(this)
-                val bitmap = BitmapFactory.decodeFile(memesPathsArray[viewPager.currentItem])
-                WatermarkBuilder.create(
-                    this,
-                    bitmap
-                )
-                    .loadWatermarkText(
-                        WatermarkText(getString(R.string.watermark_text))
-                            .setTextAlpha(175)
-                            .setPositionY(0.85)
-                            .setTextSize(10.0)
-                            .setBackgroundColor(Color.WHITE)
-                            .setTextColor(Color.BLACK)
-                    )
-                    .watermark
-                    .saveToLocalPng(tmpDir.resolve("img").absolutePath)
-
-                PainKiller().getTemporaryFirstFile(this)!!
-
-            } else {
-                File(memesPathsArray[viewPager.currentItem])
-            }
-
-            val intent = Intent(Intent.ACTION_SEND)
-            intent.type = "image/${file.extension}"
-            val uri = FileProvider.getUriForFile(
-                this,
-                applicationContext.packageName + ".provider",
-                file
             )
-            intent.putExtra(Intent.EXTRA_STREAM, uri)
-            startActivity(Intent.createChooser(intent, getString(R.string.share_meme)))
+        }
+        button_share.setOnLongClickListener {
+            shareMeme(File(memesPathsArray[viewPager.currentItem]), false)
+            true
         }
     }
 
