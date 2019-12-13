@@ -31,6 +31,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.google.android.material.navigation.NavigationView
 import com.soszynski.mateusz.dotmeme.*
+import com.soszynski.mateusz.dotmeme.memebase.MemeSearch
 import com.soszynski.mateusz.dotmeme.memebase.Memebase
 import com.soszynski.mateusz.dotmeme.services.FullMemeSyncService
 import io.doorbell.android.Doorbell
@@ -352,7 +353,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     val config = realm.configuration // Thread migration
                     doAsync {
                         val realm = Realm.getInstance(config) // Thread migration
-                        val finalList = Memebase()
+                        val finalList = MemeSearch()
                             .search(realm, query)
                             .map(Meme::filePath)
                         uiThread {

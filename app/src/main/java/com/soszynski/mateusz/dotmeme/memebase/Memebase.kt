@@ -10,7 +10,6 @@ import com.google.firebase.perf.FirebasePerformance
 import com.soszynski.mateusz.dotmeme.*
 import io.realm.Realm
 import io.realm.RealmConfiguration
-import org.apache.commons.lang3.StringUtils
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.io.File
@@ -630,60 +629,6 @@ class Memebase {
             }
         )
 
-    }
-
-    /**
-     * Search for memes.
-     * This function is exception from "no long functions in Memebase class" rule.
-     * It's just easier to migrate Realm and all folders to different thread when calling it.
-     *
-     * @param realm [Realm]
-     * @param query text to search.
-     * @param folders [MemeFolder]s to scan. Default value is all of them.
-     *
-     * @return list of found [Meme]s
-     */
-    fun search(
-        realm: Realm,
-        query: String,
-        folders: List<MemeFolder> = realm.where(MemeFolder::class.java).findAll().toList()
-    ): List<Meme> {
-        val trace = FirebasePerformance.getInstance().newTrace("memebase_search")
-        trace.start()
-
-        val memeList = mutableListOf<Pair<Int, Meme>>()
-
-        Log.i(TAG, "Begin of search, query: $query")
-
-        val keywords =
-            StringUtils.stripAccents(query).split(" ".toRegex()).dropLastWhile { it.isEmpty() }
-        for (folder in folders) {
-            for (meme in folder.memes) {
-                var pair = Pair(0, meme)
-                val strippedText = StringUtils.stripAccents(meme.rawText)
-                for (keyword in keywords) {
-                    if (strippedText.contains(keyword, true)) {
-                        pair = pair.copy(first = pair.first + 1)
-                    }
-                }
-
-                if (pair.first > 0) {
-                    memeList.add(pair)
-                }
-            }
-        }
-
-        val finalList = memeList
-            .sortedByDescending { it.first }
-            .map { return@map it.second }
-
-        trace.putMetric("memes_all_count", folders.sumBy { it.memes.count() }.toLong())
-        trace.putMetric("memes_found_count", memeList.count().toLong())
-        trace.stop()
-
-        Log.i(TAG, "Memes found: ${trace.getLongMetric("memes_found_count")}")
-
-        return finalList
     }
 
     fun getMemeRoll(realm: Realm): List<File> {
