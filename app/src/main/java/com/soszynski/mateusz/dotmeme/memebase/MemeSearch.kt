@@ -15,7 +15,7 @@ class MemeSearch {
         data class SearchOptions(
             val folders: List<MemeFolder>,
             val images: Boolean = true,
-            val videos: Boolean = true,
+            val videos: Boolean = false, // TODO
             val sortType: Int = SORT_NONE
         ) {
             companion object {
@@ -34,6 +34,9 @@ class MemeSearch {
                  * Can slow down search a bit.
                  */
                 const val SORT_OLDEST_FIRST = 2
+
+                fun getDefault(realm: Realm) =
+                    SearchOptions(realm.where(MemeFolder::class.java).findAll())
             }
         }
     }
