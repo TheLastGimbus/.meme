@@ -2,6 +2,7 @@ package com.soszynski.mateusz.dotmeme.activities
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -68,6 +69,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var updateVisibleMemeRollScheduled = false
 
     private var searchMode = false
+    private lateinit var searchOptions: MemeSearch.Companion.SearchOptions
 
 
     private fun getMemeRoll(fromCache: Boolean = false, result: (roll: List<File>) -> Unit) {
@@ -270,6 +272,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         Memebase.handleRealmConfigs()
         realm = Realm.getDefaultInstance()
+        searchOptions = MemeSearch.Companion.SearchOptions.getDefault(realm)
         val prefs = defaultSharedPreferences
         if (prefs.getBoolean(Prefs.Keys.FIRST_LAUNCH, true)) {
             startActivityForResult(
@@ -285,6 +288,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         fab_search.setOnClickListener {
             showKeyboard()
+        }
+        fab_search.setOnLongClickListener {
+            // TODO: Load current options onto this dialog
+            AlertDialog.Builder(this)
+                .setTitle("Options")
+                .setPositiveButton("Apply") { dialog, which ->
+                    // TODO: Save selected options onto searchOptions
+                }
+                .setNegativeButton("Cancel") { dialog, which ->
+                    // TODO
+                }
+                .create()
+                .show()
+            true
         }
 
         fab_go_up.setOnClickListener {
@@ -354,13 +371,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     doAsync {
                         val realm = Realm.getInstance(config) // Thread migration
                         val finalList = MemeSearch()
-                            .search(
-                                realm, query, MemeSearch.Companion.SearchOptions(
-                                    folders = realm.where(MemeFolder::class.java).findAll(),
-                                    images = true,
-                                    videos = false // TODO
-                                )
-                            )
+                            .search(realm, query, searchOptions)
                         uiThread {
                             gridView_meme_roll.adapter = ImageAdapter(finalList.map { File(it) })
                             progressBar_loading.visibility = ProgressBar.GONE
