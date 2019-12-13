@@ -11,6 +11,31 @@ import org.apache.commons.lang3.StringUtils
 class MemeSearch {
     companion object {
         val TAG = "MemeSearch"
+
+        data class SearchOptions(
+            val folders: List<MemeFolder>,
+            val images: Boolean = true,
+            val videos: Boolean = true,
+            val sortType: Int = SORT_NONE
+        ) {
+            companion object {
+                /**
+                 * Sorts only by search score.
+                 * Fastest, and all you need 95% of times.
+                 */
+                const val SORT_NONE = 0
+                /**
+                 * Sorts by search score and newest (with score being first priority, then date)
+                 * Can slow down search a bit.
+                 */
+                const val SORT_NEWEST_FIRST = 1
+                /**
+                 * Sorts by search score and oldest (with score being first priority, then date)
+                 * Can slow down search a bit.
+                 */
+                const val SORT_OLDEST_FIRST = 2
+            }
+        }
     }
 
 
