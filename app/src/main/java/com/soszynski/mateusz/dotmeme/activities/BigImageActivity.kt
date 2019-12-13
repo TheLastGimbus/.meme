@@ -1,4 +1,4 @@
-package com.soszynski.mateusz.dotmeme
+package com.soszynski.mateusz.dotmeme.activities
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -16,6 +16,7 @@ import androidx.viewpager.widget.ViewPager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.github.chrisbanes.photoview.PhotoView
+import com.soszynski.mateusz.dotmeme.*
 import com.watermark.androidwm_light.WatermarkBuilder
 import com.watermark.androidwm_light.bean.WatermarkText
 import io.realm.Realm

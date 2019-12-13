@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
-    tools:context=".Intro2Fragment">
+    tools:context=".fragments.Intro2Fragment">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -15,7 +15,7 @@
 
         <fragment
             android:id="@+id/fragment"
-            android:name="com.soszynski.mateusz.dotmeme.FoldersSettingsFragment"
+            android:name="com.soszynski.mateusz.dotmeme.fragments.FoldersSettingsFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginStart="16dp"

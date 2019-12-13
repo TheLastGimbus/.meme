@@ -1,10 +1,12 @@
-package com.soszynski.mateusz.dotmeme
+package com.soszynski.mateusz.dotmeme.activities
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.soszynski.mateusz.dotmeme.FullSyncWorker
+import com.soszynski.mateusz.dotmeme.R
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_dev_stuff.*
 

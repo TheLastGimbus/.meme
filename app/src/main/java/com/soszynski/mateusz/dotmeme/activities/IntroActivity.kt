@@ -1,4 +1,4 @@
-package com.soszynski.mateusz.dotmeme
+package com.soszynski.mateusz.dotmeme.activities
 
 import android.Manifest
 import android.app.Activity
@@ -8,6 +8,11 @@ import android.os.Handler
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.github.paolorotolo.appintro.AppIntro
+import com.soszynski.mateusz.dotmeme.PainKiller
+import com.soszynski.mateusz.dotmeme.Prefs
+import com.soszynski.mateusz.dotmeme.R
+import com.soszynski.mateusz.dotmeme.fragments.Intro1Fragment
+import com.soszynski.mateusz.dotmeme.fragments.Intro2Fragment
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.toast
 

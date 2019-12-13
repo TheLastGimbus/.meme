@@ -1,4 +1,4 @@
-package com.soszynski.mateusz.dotmeme
+package com.soszynski.mateusz.dotmeme.services
 
 import android.app.ActivityManager
 import android.app.Service
@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
+import com.soszynski.mateusz.dotmeme.*
 import io.realm.Realm
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doAsync
@@ -39,7 +40,12 @@ class FullMemeSyncService : Service() {
 
         startForeground(
             Notifs.NOTIFICATION_ID_SYNCING,
-            Notifs.getScanningForegroundNotification(this, null, null, null)
+            Notifs.getScanningForegroundNotification(
+                this,
+                null,
+                null,
+                null
+            )
         )
         fullSync()
     }

@@ -9,6 +9,8 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import com.soszynski.mateusz.dotmeme.activities.SettingsActivity
+import com.soszynski.mateusz.dotmeme.receivers.NewFolderFoundDecisionReceiver
 import java.io.File
 import kotlin.random.Random
 

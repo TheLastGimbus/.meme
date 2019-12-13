@@ -1,4 +1,4 @@
-package com.soszynski.mateusz.dotmeme
+package com.soszynski.mateusz.dotmeme.fragments
 
 
 import android.content.Context
@@ -7,6 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.soszynski.mateusz.dotmeme.Memebase
+import com.soszynski.mateusz.dotmeme.PainKiller
+import com.soszynski.mateusz.dotmeme.Prefs
+import com.soszynski.mateusz.dotmeme.R
 import io.realm.Realm
 import kotlinx.android.synthetic.main.fragment_intro1.*
 import org.jetbrains.anko.defaultSharedPreferences

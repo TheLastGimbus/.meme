@@ -1,10 +1,12 @@
-package com.soszynski.mateusz.dotmeme
+package com.soszynski.mateusz.dotmeme.receivers
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
+import com.soszynski.mateusz.dotmeme.MemeFolder
+import com.soszynski.mateusz.dotmeme.Memebase
 import io.realm.Realm
 
 class NewFolderFoundDecisionReceiver : BroadcastReceiver() {

@@ -1,8 +1,9 @@
-package com.soszynski.mateusz.dotmeme
+package com.soszynski.mateusz.dotmeme.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
+import com.soszynski.mateusz.dotmeme.R
 import kotlinx.android.synthetic.main.activity_settings.*
 
 class SettingsActivity : AppCompatActivity() {
@@ -12,7 +13,10 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.settings, SettingsFragment())
+            .replace(
+                R.id.settings,
+                SettingsFragment()
+            )
             .commit()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 

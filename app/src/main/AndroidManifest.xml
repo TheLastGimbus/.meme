@@ -17,31 +17,31 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".FoldersSettingsActivity">
+        <activity android:name=".activities.FoldersSettingsActivity">
             <intent-filter>
                 <action android:name="com.soszynski.mateusz.dotmeme.FoldersSettingsActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".SettingsActivity"
-            android:parentActivityName=".MainActivity">
+            android:name=".activities.SettingsActivity"
+            android:parentActivityName=".activities.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.soszynski.mateusz.dotmeme.MainActivity" />
+                android:value="com.soszynski.mateusz.dotmeme.activities.MainActivity" />
         </activity>
         <activity
-            android:name=".AboutActivity"
+            android:name=".activities.AboutActivity"
             android:configChanges="orientation|screenSize" />
         <activity
-            android:name=".IntroActivity"
+            android:name=".activities.IntroActivity"
             android:configChanges="orientation|screenSize" />
-        <activity android:name=".DevStuffActivity" />
+        <activity android:name=".activities.DevStuffActivity" />
         <activity
-            android:name=".BigImageActivity"
+            android:name=".activities.BigImageActivity"
             android:configChanges="orientation|screenSize" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -68,12 +68,12 @@
         </provider>
 
         <receiver
-            android:name=".NewFolderFoundDecisionReceiver"
+            android:name=".receivers.NewFolderFoundDecisionReceiver"
             android:enabled="true"
             android:exported="false" />
 
         <service
-            android:name=".FullMemeSyncService"
+            android:name=".services.FullMemeSyncService"
             android:exported="false" />
     </application>
 

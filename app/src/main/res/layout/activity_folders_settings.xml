@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
     android:fitsSystemWindows="true"
-    tools:context=".SettingsActivity">
+    tools:context=".activities.SettingsActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -30,7 +30,7 @@
 
         <fragment
             android:id="@+id/fragment"
-            android:name="com.soszynski.mateusz.dotmeme.FoldersSettingsFragment"
+            android:name="com.soszynski.mateusz.dotmeme.fragments.FoldersSettingsFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </FrameLayout>

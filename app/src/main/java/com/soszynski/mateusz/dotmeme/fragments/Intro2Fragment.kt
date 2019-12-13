@@ -1,4 +1,4 @@
-package com.soszynski.mateusz.dotmeme
+package com.soszynski.mateusz.dotmeme.fragments
 
 
 import android.os.Bundle
@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.soszynski.mateusz.dotmeme.R
 
 class Intro2Fragment : Fragment() {
 

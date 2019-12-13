@@ -1,4 +1,4 @@
-package com.soszynski.mateusz.dotmeme
+package com.soszynski.mateusz.dotmeme.fragments
 
 import android.app.AlertDialog
 import android.content.Context
@@ -13,6 +13,7 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.soszynski.mateusz.dotmeme.*
 import io.realm.Realm
 import io.realm.RealmChangeListener
 import kotlinx.android.synthetic.main.fragment_folders_settings.view.*
@@ -32,7 +33,12 @@ class FoldersSettingsFragment : Fragment(), RealmChangeListener<Realm> {
         val text = TextView(ctx)
         text.text = File(folder.folderPath).name
         text.textSize = 16f
-        text.setTextColor(ContextCompat.getColor(ctx, R.color.fontDefault))
+        text.setTextColor(
+            ContextCompat.getColor(
+                ctx,
+                R.color.fontDefault
+            )
+        )
         text.isSingleLine = true
         text.ellipsize = TextUtils.TruncateAt.MIDDLE
         // TODO: Fix long text covering switch
