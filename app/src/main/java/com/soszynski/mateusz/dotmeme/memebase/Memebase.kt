@@ -4,14 +4,10 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.os.FileObserver
 import android.util.Log
-import com.google.firebase.ml.vision.FirebaseVision
-import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.perf.FirebasePerformance
 import com.soszynski.mateusz.dotmeme.*
 import io.realm.Realm
 import io.realm.RealmConfiguration
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
 import java.io.File
 import java.util.*
 
@@ -453,11 +449,6 @@ class Memebase {
         progress: (all: Int, scanned: Int) -> Unit,
         finished: () -> Unit
     ) {
-        if (!PainKiller().hasStoragePermission(ctx)) {
-            Log.w(TAG, "Can't scan: no storage permission!")
-            finished()
-            return
-        }
 
         var syncingFolder = false
         isScanning = true
