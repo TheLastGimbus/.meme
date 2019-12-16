@@ -1,11 +1,10 @@
 package com.soszynski.mateusz.dotmeme.memebase
 
-import android.content.Context
 import android.graphics.Bitmap
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 
-class MemeOcr(val ctx: Context) {
+class MemeOcr {
 
     private val ocr = FirebaseVision.getInstance().onDeviceTextRecognizer
 
