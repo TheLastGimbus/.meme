@@ -10,15 +10,13 @@ class MemeOcr {
 
     @Throws(Exception::class)
     fun scanImage(bitmap: Bitmap): String {
-        var finished = false
         var text = ""
 
         val fireImage = FirebaseVisionImage.fromBitmap(bitmap)
-        ocr.processImage(fireImage)
+        val process = ocr.processImage(fireImage)
             .addOnSuccessListener { text = it.text }
             .addOnFailureListener { throw it }
-            .continueWith { finished = true }
-        while (!finished);
+        while (!process.isComplete);
         return text
     }
 }
