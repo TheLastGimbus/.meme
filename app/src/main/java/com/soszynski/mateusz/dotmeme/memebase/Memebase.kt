@@ -4,14 +4,10 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.os.FileObserver
 import android.util.Log
-import com.google.firebase.ml.vision.FirebaseVision
-import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.perf.FirebasePerformance
 import com.soszynski.mateusz.dotmeme.*
 import io.realm.Realm
 import io.realm.RealmConfiguration
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
 import java.io.File
 import java.util.*
 
@@ -66,7 +62,7 @@ class Memebase {
     var isScanning = false
     var scanningCanceled = false
 
-    private val ocr = FirebaseVision.getInstance().onDeviceTextRecognizer
+    private val ocr = MemeOcr()
 
     /**
      * This function synchronizes folders index on database.
@@ -438,7 +434,6 @@ class Memebase {
     /**
      * Scans whole [folder] recursively.
      * Make sure to sync [folder] before calling this.
-     * THIS MUST RUN ON UI THREAD!
      *
      * @param realm [Realm]
      * @param folder [MemeFolder] to scan.
@@ -451,15 +446,8 @@ class Memebase {
         ctx: Context,
         folder: MemeFolder,
         progress: (all: Int, scanned: Int) -> Unit,
-        finished: () -> Unit
+        finished: () -> Unit // TODO: Do something with this
     ) {
-        if (!PainKiller().hasStoragePermission(ctx)) {
-            Log.w(TAG, "Can't scan: no storage permission!")
-            finished()
-            return
-        }
-
-        var syncingFolder = false
         isScanning = true
 
         val folderPath = folder.folderPath
@@ -506,66 +494,48 @@ class Memebase {
                 e.printStackTrace()
             }
 
-            val fireImage = FirebaseVisionImage.fromBitmap(bitmap)
-            ocr.processImage(fireImage)
-                .addOnSuccessListener { fireText ->
-                    if (scanningCanceled) {
-                        isScanning = false
-                        return@addOnSuccessListener
-                    }
-                    try {
-                        realm.executeTransaction {
-                            meme.rawText = fireText.text
-                            meme.isScanned = true
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+            try {
+                val text = ocr.scanImage(bitmap)
+
+                if (scanningCanceled) {
+                    isScanning = false
+                    return
                 }
-                .addOnFailureListener { e ->
+                try {
+                    realm.executeTransaction {
+                        meme.rawText = text
+                        meme.isScanned = true
+                    }
+                } catch (e: Exception) {
                     e.printStackTrace()
-                    doAsync {
-                        syncingFolder = true
-                        syncFolder(
-                            realm,
-                            folder
-                        ) // Probably something wrong with current index if error occurred
-                        syncingFolder = false
-                    }
                 }
-                .continueWith {
-                    trace.stop()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Probably something wrong with current index if error occurred
+                syncFolder(realm, folder)
+            }
+            trace.stop()
 
-                    if (scanningCanceled) {
-                        scanningFileObserver.stopWatching()
-                        isScanning = false
-                        finished()
-                        return@continueWith
-                    }
+            if (scanningCanceled) {
+                scanningFileObserver.stopWatching()
+                isScanning = false
+                finished()
+                return
+            }
+            val all = folder.memes.count()
+            val scanned =
+                folder.memes.where().equalTo(Meme.IS_SCANNED, true).findAll().count()
+            progress(all, scanned)
 
-                    val all = folder.memes.count()
-                    val scanned =
-                        folder.memes.where().equalTo(Meme.IS_SCANNED, true).findAll().count()
-                    progress(all, scanned)
+            if (changeInFolder) {
+                syncFolder(realm, folder)
+            }
 
-                    if (changeInFolder) {
-                        syncingFolder = true
-                        syncFolder(realm, folder)
-                        syncingFolder = false
-                    }
+            scanningFileObserver.stopWatching()
+            // This is theoretically recursion, but there is nothing big to be left in stack
+            scanFolder(realm, ctx, folder, progress, finished)
 
 
-                    doAsync {
-                        while (syncingFolder);
-
-                        uiThread {
-                            scanningFileObserver.stopWatching()
-                            // This is theoretically recursion, but there is nothing big to be left in stack
-                            scanFolder(realm, ctx, folder, progress, finished)
-                        }
-                    }
-
-                }
         } else {
             isScanning = false
             finished()

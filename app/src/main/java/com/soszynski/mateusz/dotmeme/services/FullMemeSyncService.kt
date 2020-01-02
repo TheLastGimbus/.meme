@@ -17,7 +17,6 @@ import com.soszynski.mateusz.dotmeme.memebase.Memebase
 import io.realm.Realm
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
 import java.io.File
 
 
@@ -90,30 +89,27 @@ class FullMemeSyncService : Service() {
                 }
             }
 
-            uiThread {
-                val realm = Realm.getDefaultInstance()
-                Log.i(TAG, "Scanning all folders")
-                memebase.scanAllFolders(
-                    realm, this@FullMemeSyncService,
-                    { memeFolder: MemeFolder, all: Int, progress: Int ->
-                        // progress
-                        startForeground(
-                            Notifs.NOTIFICATION_ID_SYNCING,
-                            Notifs.getScanningForegroundNotification(
-                                this@FullMemeSyncService,
-                                File(memeFolder.folderPath).name,
-                                progress,
-                                all
-                            )
+            Log.i(TAG, "Scanning all folders")
+            memebase.scanAllFolders(
+                realm, this@FullMemeSyncService,
+                { memeFolder: MemeFolder, all: Int, progress: Int ->
+                    // progress
+                    startForeground(
+                        Notifs.NOTIFICATION_ID_SYNCING,
+                        Notifs.getScanningForegroundNotification(
+                            this@FullMemeSyncService,
+                            File(memeFolder.folderPath).name,
+                            progress,
+                            all
                         )
-                    },
-                    {
-                        // finished
-                        stopForeground(true)
-                        stopSelf()
-                    }
-                )
-            }
+                    )
+                },
+                {
+                    // finished
+                    stopForeground(true)
+                    stopSelf()
+                }
+            )
         }
     }
 
