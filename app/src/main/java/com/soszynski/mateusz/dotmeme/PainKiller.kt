@@ -12,7 +12,6 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import com.google.firebase.perf.FirebasePerformance
 import java.io.File
 
 
@@ -72,9 +71,6 @@ class PainKiller {
      */
     @Deprecated("Use getAllFoldersWithImagesOrVideos")
     fun getAllFoldersWithImages(ctx: Context, includeHidden: Boolean = false): List<File> {
-        val trace = FirebasePerformance.getInstance()
-            .newTrace("painkiller_get_all_folders_with_images")
-        trace.start()
         val dirs =
             searchForPhotoDirs(ctx, Environment.getExternalStorageDirectory()) +
                     searchForPhotoDirs(ctx, File("/storage"))
@@ -84,15 +80,10 @@ class PainKiller {
         }
         Log.i(TAG, "All folders with photos: \n$prettyDirs")
 
-        trace.stop()
-
         return dirs.toList()
     }
 
     fun getAllFoldersWithImagesOrVideos(ctx: Context, includeHidden: Boolean = false): List<File> {
-        val trace = FirebasePerformance.getInstance()
-            .newTrace("painkiller_get_all_folders_with_images_or_videos")
-        trace.start()
         val dirs =
             (searchForPhotoOrVideoDirs(
                 ctx,
@@ -108,8 +99,6 @@ class PainKiller {
             prettyDirs += dir.absolutePath + "\n"
         }
         Log.i(TAG, "All folders with photos or videos: \n$prettyDirs")
-
-        trace.stop()
 
         return dirs.toList()
     }

@@ -1,7 +1,6 @@
 package com.soszynski.mateusz.dotmeme.memebase
 
 import android.util.Log
-import com.google.firebase.perf.FirebasePerformance
 import com.soszynski.mateusz.dotmeme.MemeFolder
 import io.realm.Realm
 import org.apache.commons.lang3.StringUtils
@@ -62,9 +61,6 @@ class MemeSearch {
             TODO("Videos are not yet implemented in most of the places")
         }
 
-        val trace = FirebasePerformance.getInstance().newTrace("memebase_search")
-        trace.start()
-
         val memeList = mutableListOf<Pair<Int, String>>()
 
         Log.i(TAG, "Begin of search, query: $query")
@@ -116,11 +112,7 @@ class MemeSearch {
             .sortedWith(comparator)
             .map { return@map it.second }
 
-        trace.putMetric("memes_all_count", folders.sumBy { it.memes.count() }.toLong())
-        trace.putMetric("memes_found_count", memeList.count().toLong())
-        trace.stop()
-
-        Log.i(TAG, "Memes found: ${trace.getLongMetric("memes_found_count")}")
+        Log.i(TAG, "Memes found: ${memeList.count()}")
 
         return finalList
     }

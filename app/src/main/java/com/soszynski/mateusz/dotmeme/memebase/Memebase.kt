@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.os.FileObserver
 import android.util.Log
-import com.google.firebase.perf.FirebasePerformance
 import com.soszynski.mateusz.dotmeme.*
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -174,8 +173,6 @@ class Memebase {
         realm: Realm,
         folder: MemeFolder
     ): Pair<List<Meme>, List<MemeVideo>> {
-        val trace = FirebasePerformance.getInstance().newTrace("memebase_sync_folder")
-        trace.start()
         realm.executeTransaction {
             folder.lastSync = Calendar.getInstance().time
         }
@@ -188,10 +185,6 @@ class Memebase {
 
         deleteNotExistingVideosFromFolder(realm, folder, videosInFolderList)
         val newVideos = addNewVideosToFolder(realm, folder, videosInFolderList)
-
-        trace.putMetric("folder_images_count", folder.memes.count().toLong())
-        trace.putMetric("folder_new_memes", newMemes.count().toLong())
-        trace.stop()
 
         return Pair(newMemes, newVideos)
     }
@@ -350,17 +343,6 @@ class Memebase {
             return emptyList()
         }
 
-        val trace =
-            if (syncFoldersIndex) {
-                if (syncUnofficialFoldersIndex)
-                    FirebasePerformance.startTrace("memebase_sync_all_folders_with_unofficial_index")
-                else
-                    FirebasePerformance.startTrace("memebase_sync_all_folders_with_index")
-            } else {
-                FirebasePerformance.startTrace("memebase_sync_all_folders_without_index")
-            }
-        trace.start()
-
         isSyncing = true
 
         var newFolders = emptyList<MemeFolder>()
@@ -392,17 +374,10 @@ class Memebase {
                 Date(File(it.folderPath).lastModified())
                     .after(it.lastSync)
             }
-        trace.putMetric("folders_to_sync", foldersToSync.count().toLong())
 
         syncAllFoldersRecursive(realm, foldersToSync)
 
         cacheRoll(realm)
-
-        trace.putMetric(
-            "realm_file_size_mb",
-            ((File(realm.path).length() / 1024) / 1024)
-        )
-        trace.stop()
 
         isSyncing = false
         return newFolders
@@ -478,21 +453,8 @@ class Memebase {
         val notScannedMemes = folder.memes.where()
             .equalTo(Meme.IS_SCANNED, false).findAll()
         if (notScannedMemes.count() > 0) {
-            val trace = FirebasePerformance.getInstance().newTrace("memebase_meme_scan")
-            trace.start()
-
             val meme = notScannedMemes.first()!!
             val bitmap = BitmapFactory.decodeFile(meme.filePath)
-
-            // Don't even ask me why this needs to be in 'try'
-            try {
-                trace.putMetric("bitmap_size_bytes", bitmap.byteCount.toLong())
-                trace.putMetric("bitmap_size_height", bitmap.height.toLong())
-                trace.putMetric("bitmap_size_width", bitmap.width.toLong())
-                trace.putMetric("bitmap_size_all", (bitmap.height * bitmap.width).toLong())
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
 
             try {
                 val text = ocr.scanImage(ctx, bitmap)
@@ -514,7 +476,6 @@ class Memebase {
                 // Probably something wrong with current index if error occurred
                 syncFolder(realm, folder)
             }
-            trace.stop()
 
             if (scanningCanceled) {
                 scanningFileObserver.stopWatching()
