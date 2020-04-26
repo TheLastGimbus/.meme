@@ -1,7 +1,6 @@
 package com.soszynski.mateusz.dotmeme.memebase
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.os.FileObserver
 import android.util.Log
 import com.soszynski.mateusz.dotmeme.*
@@ -454,10 +453,9 @@ class Memebase {
             .equalTo(Meme.IS_SCANNED, false).findAll()
         if (notScannedMemes.count() > 0) {
             val meme = notScannedMemes.first()!!
-            val bitmap = BitmapFactory.decodeFile(meme.filePath)
 
             try {
-                val text = ocr.scanImage(ctx, bitmap)
+                val text = ocr.scanImage(ctx, File(meme.filePath))
 
                 if (scanningCanceled) {
                     isScanning = false

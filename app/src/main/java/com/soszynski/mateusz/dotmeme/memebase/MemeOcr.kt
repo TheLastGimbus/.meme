@@ -1,7 +1,6 @@
 package com.soszynski.mateusz.dotmeme.memebase
 
 import android.content.Context
-import android.graphics.Bitmap
 import com.googlecode.tesseract.android.TessBaseAPI
 import java.io.File
 
@@ -25,7 +24,7 @@ class MemeOcr {
     }
 
     @Throws(Exception::class)
-    fun scanImage(ctx: Context, bitmap: Bitmap): String {
+    fun scanImage(ctx: Context, file: File): String {
         var text = ""
 
         val tess = TessBaseAPI()
@@ -34,7 +33,7 @@ class MemeOcr {
             DEFAULT_LANGUAGE,
             TessBaseAPI.OEM_LSTM_ONLY
         )
-        tess.setImage(bitmap)
+        tess.setImage(file)
         text = tess.utF8Text // DO NOT change this to kotlin-style !
         tess.end()
         return text
