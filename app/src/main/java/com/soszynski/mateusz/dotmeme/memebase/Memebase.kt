@@ -495,7 +495,7 @@ class Memebase {
             }
 
             try {
-                val text = ocr.scanImage(bitmap)
+                val text = ocr.scanImage(ctx, bitmap)
 
                 if (scanningCanceled) {
                     isScanning = false
