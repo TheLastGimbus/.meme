@@ -1,7 +1,5 @@
 apply plugin: 'com.android.application'
 
-apply plugin: 'com.google.firebase.firebase-perf'
-
 apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
@@ -65,10 +63,6 @@ dependencies {
 
     implementation "androidx.work:work-runtime-ktx:2.2.0"
 
-    implementation 'com.google.firebase:firebase-core:17.2.1'
-    implementation 'com.google.firebase:firebase-ml-vision:24.0.0'
-    implementation 'com.google.firebase:firebase-perf:19.0.1'
-
     implementation 'cz.adaptech.android:tesseract4android:2.1.0'
 
     implementation 'org.jetbrains.anko:anko-common:0.9'
@@ -81,5 +75,3 @@ dependencies {
     // implementation 'me.xdrop:fuzzywuzzy:1.2.0'
 
 }
-
-apply plugin: 'com.google.gms.google-services'
