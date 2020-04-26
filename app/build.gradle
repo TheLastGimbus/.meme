@@ -14,7 +14,7 @@ android {
     compileSdkVersion 29
     defaultConfig {
         applicationId "com.soszynski.mateusz.dotmeme"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 13
         versionName "1.4.7"
@@ -69,7 +69,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-ml-vision:24.0.0'
     implementation 'com.google.firebase:firebase-perf:19.0.1'
 
-    implementation 'com.rmtheis:tess-two:9.0.0'
+    implementation 'cz.adaptech.android:tesseract4android:2.1.0'
 
     implementation 'org.jetbrains.anko:anko-common:0.9'
 
