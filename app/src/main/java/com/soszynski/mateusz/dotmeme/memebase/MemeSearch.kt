@@ -97,15 +97,15 @@ class MemeSearch {
         }
 
         val comparator = when (options.sortType) {
-            SearchOptions.SORT_NONE -> compareBy { it.first }
+            SearchOptions.SORT_NONE -> compareByDescending { it.first }
             SearchOptions.SORT_NEWEST_FIRST -> {
-                compareBy<Pair<Int, String>> { it.first }.thenByDescending { File(it.second).lastModified() }
+                compareByDescending<Pair<Int, String>> { it.first }.thenByDescending { File(it.second).lastModified() }
             }
             SearchOptions.SORT_OLDEST_FIRST -> {
-                compareBy<Pair<Int, String>> { it.first }
+                compareByDescending<Pair<Int, String>> { it.first }
                     .thenBy { File(it.second).lastModified() }
             }
-            else -> compareBy<Pair<Int, String>> { it.first }
+            else -> compareByDescending<Pair<Int, String>> { it.first }
         }
 
         val finalList = memeList
