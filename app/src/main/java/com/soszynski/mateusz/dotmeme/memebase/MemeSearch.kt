@@ -66,7 +66,7 @@ class MemeSearch {
         Log.i(TAG, "Begin of search, query: $query")
 
         val keywords =
-            StringUtils.stripAccents(query).split(" ".toRegex()).dropLastWhile { it.isEmpty() }
+            StringUtils.stripAccents(query).split(" ".toRegex()).dropWhile { it.isBlank() }
         val folders = realm.where(MemeFolder::class.java)
             .`in`(MemeFolder.FOLDER_PATH, options.folders.toTypedArray())
             .findAll()
