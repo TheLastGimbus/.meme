@@ -60,7 +60,7 @@ class Memebase {
     var isScanning = false
     var scanningCanceled = false
 
-    private val ocr = MemeOcr()
+    private lateinit var ocr: MemeOcr
 
     /**
      * This function synchronizes folders index on database.
@@ -423,7 +423,9 @@ class Memebase {
         finished: () -> Unit // TODO: Do something with this
     ) {
         isScanning = true
-
+        if (!::ocr.isInitialized) {
+            ocr = MemeOcr(ctx)
+        }
         val folderPath = folder.folderPath
 
         var changeInFolder = false
